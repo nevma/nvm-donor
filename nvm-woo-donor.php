@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Class Nvm erp bridge.
+ * Class Donor.
  */
 class Donor {
 	/**
@@ -138,59 +138,6 @@ class Donor {
 		);
 	}
 
-	/**
-	 * Updates the price of a given post.
-	 *
-	 * This function creates a new instance of the Woo_Price class and calls the
-	 * track_price_changes method to update the price of the specified post.
-	 *
-	 * @param int     $post_id The ID of the post to update.
-	 * @param WP_Post $post    The post object.
-	 * @param bool    $update  Whether this is an existing post being updated or not.
-	 */
-	public function update_price( $post_id, $post, $update ) {
-
-		$update = new Woo_Price();
-		$update->track_price_changes( $post_id, $post, $update );
-	}
-
-	/**
-	 * Adds a metabox to the product edit screen.
-	 */
-	public function Donor_metabox() {
-
-		add_meta_box(
-			'Donor_metabox',
-			__( 'Price History', 'nevma' ),
-			array( $this, 'display_Donor_metabox' ),
-			'product',
-			'side',
-			'default'
-		);
-	}
-
-	public function display_Donor_metabox() {
-
-		echo '<h3>' . __( 'Price History', 'nvm-product-price-history-inline' ) . '</h3>';
-		global $post;
-		$product = wc_get_product( $post->ID );
-		$Donor   = $product->get_meta( '_nvm_Donor' );
-
-		if ( ! is_array( $Donor ) || empty( $Donor ) ) {
-			echo '<p>' . __( 'No price changes recorded.', 'nvm-product-price-history-inline' ) . '</p>';
-			return;
-		}
-
-		echo '<ul>';
-		foreach ( array_reverse( $Donor ) as $entry ) {
-			echo '<li>';
-			echo esc_html( date( 'd/m/Y H:i', strtotime( $entry['date'] ) ) );
-			echo ' - ' . '<strong>' . wc_price( $entry['sale_price'] ) . '</strong>';
-			echo '</li>';
-		}
-		echo '</ul>';
-	}
-
 	public function declare_hpos_compatibility() {
 
 		if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
@@ -213,6 +160,23 @@ class Donor {
 				esc_html__( 'Return to Plugins.', 'nevma' ) . '</a>'
 			);
 		}
+	}
+
+	public function render_donation_form() {
+		ob_start();
+		?>
+		<form method="POST" action="<?php echo esc_url( wc_get_cart_url() ); ?>">
+			<label for="donation-type">Επιλέξτε Τύπο Δωρεάς:</label>
+			<select id="donation-type" name="donation_type" required>
+				<option value="personal">Ατομική</option>
+				<option value="corporate">Εταιρική</option>
+				<option value="in-memory">Εις Μνήμη</option>
+			</select>
+			<!-- Εμφάνιση σχετικών πεδίων ανάλογα με την επιλογή -->
+			<button type="submit">Προσθήκη στο καλάθι</button>
+		</form>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
