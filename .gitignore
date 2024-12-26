@@ -7,5 +7,5 @@ composer.phar
 .phpunit.result.cache
 
 # Εξαιρέσεις για το autoload
-!/vendor/autoload.php
-!/vendor/composer/autoload_*
+!/prefixed/autoload.php
+!/prefixed/composer/autoload_*
