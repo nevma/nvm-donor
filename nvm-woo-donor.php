@@ -105,8 +105,6 @@ class Donor {
 
 		// Scripts & Styles.
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
-		add_action( 'save_post_product', array( $this, 'update_price' ), 10, 3 );
-		add_action( 'add_meta_boxes', array( $this, 'Donor_metabox' ) );
 	}
 
 	/**
