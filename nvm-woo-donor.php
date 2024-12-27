@@ -106,8 +106,9 @@ class Donor {
 		// Scripts & Styles.
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
+		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donation_form_to_checkout' ), 10 );
 		add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
-		add_action( 'nvm_donor_before', array( $this, 'initiate_redirect_template' ), 10 );
+		add_action( 'donor_before', array( $this, 'initiate_redirect_template' ), 10 );
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
 	}
 
@@ -175,6 +176,64 @@ class Donor {
 		}
 	}
 
+	// Add a custom donation form to the checkout page
+	public function add_donation_form_to_checkout() {
+		?>
+	<div class="donation-form">
+		<h3><?php esc_html_e( 'Make a Donation', 'text-domain' ); ?></h3>
+		<p><?php esc_html_e( 'Your generosity supports our cause. Choose a donation type and amount below.', 'text-domain' ); ?></p>
+
+		<!-- Donation Type -->
+		<p>
+			<label for="donation-type"><?php esc_html_e( 'Donation Type', 'text-domain' ); ?></label>
+			<select id="donation-type" name="donation_type">
+				<option value="individual"><?php esc_html_e( 'Individual', 'text-domain' ); ?></option>
+				<option value="corporate"><?php esc_html_e( 'Corporate', 'text-domain' ); ?></option>
+				<option value="memoriam"><?php esc_html_e( 'In Memoriam', 'text-domain' ); ?></option>
+			</select>
+		</p>
+
+		<!-- Donation Amount -->
+		<p>
+			<label><?php esc_html_e( 'Donation Amount', 'text-domain' ); ?></label><br>
+			<label><input type="radio" name="donation_amount" value="5"> €5</label><br>
+			<label><input type="radio" name="donation_amount" value="10"> €10</label><br>
+			<label><input type="radio" name="donation_amount" value="25"> €25</label><br>
+			<label><input type="radio" name="donation_amount" value="50"> €50</label><br>
+			<label>
+				<input type="radio" name="donation_amount" value="custom">
+				<?php esc_html_e( 'Other Amount', 'text-domain' ); ?>
+				<input type="number" id="custom-donation-amount" name="custom_donation_amount" min="1" step="0.01" placeholder="<?php esc_attr_e( 'Enter amount', 'text-domain' ); ?>" disabled>
+			</label>
+		</p>
+	</div>
+
+	<script>
+		// Enable custom donation amount input when selected
+		document.addEventListener('DOMContentLoaded', function () {
+			const customAmountRadio = document.querySelector('input[name="donation_amount"][value="custom"]');
+			const customAmountInput = document.getElementById('custom-donation-amount');
+
+			customAmountRadio.addEventListener('change', function () {
+				if (this.checked) {
+					customAmountInput.disabled = false;
+					customAmountInput.focus();
+				}
+			});
+
+			document.querySelectorAll('input[name="donation_amount"]').forEach(function (radio) {
+				if (radio.value !== 'custom') {
+					radio.addEventListener('change', function () {
+						customAmountInput.disabled = true;
+						customAmountInput.value = '';
+					});
+				}
+			});
+		});
+	</script>
+		<?php
+	}
+
 	public function initiate_redirect_template() {
 
 		add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
@@ -224,7 +283,7 @@ class Donor {
 	public function render_donation_form() {
 
 		ob_start();
-		do_action( 'nvm_donor_before' );
+		do_action( 'donor_before' );
 		echo do_shortcode( '[woocommerce_checkout]' );
 		?>
 		<?php
