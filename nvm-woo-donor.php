@@ -105,6 +105,8 @@ class Donor {
 
 		// Scripts & Styles.
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
+		add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
 	}
 
 	/**
@@ -159,6 +161,41 @@ class Donor {
 			);
 		}
 	}
+
+	public function enqueue_donor_script() {
+		if ( is_checkout() ) {
+			wp_enqueue_style(
+				'nvm-donor',
+				plugin_dir_url( __FILE__ ) . 'css/style.css',
+				array(),
+				self::$plugin_version
+			);
+		}
+	}
+
+	/**
+	 * Filter the cart template path to use cart.php in this plugin instead of the one in WooCommerce.
+	 *
+	 * @param string $template      Default template file path.
+	 * @param string $template_name Template file slug.
+	 * @param string $template_path Template file name.
+	 *
+	 * @return string The new Template file path.
+	 */
+	public function redirect_wc_template( $template, $template_name, $template_path ) {
+
+		if ( 'form-checkout.php' === basename( $template ) ) {
+			$template = trailingslashit( plugin_dir_path( __FILE__ ) ) . 'woocommerce/checkout/form-checkout.php';
+		} elseif ( 'payment.php' === basename( $template ) ) {
+			$template = trailingslashit( plugin_dir_path( __FILE__ ) ) . 'woocommerce/checkout/payment.php';
+		} elseif ( 'review-order.php' === basename( $template ) ) {
+			$template = trailingslashit( plugin_dir_path( __FILE__ ) ) . 'woocommerce/checkout/review-order.php';
+		}
+
+		return $template;
+	}
+
+
 
 	public function render_donation_form() {
 		ob_start();
