@@ -1,10 +1,10 @@
 <?php //phpcs:ignore - \r\n issue
 
 /*
- * Plugin Name: WooCommerce Donor plugin Woo
+ * Plugin Name: WooCommerce Donor plugin by Nevma
  * Plugin URI:
- * Description: WooCommerce Donor plugin Woo
- * Version: 0.0.2
+ * Description: A plugin to handle donations via WooCommerce by nevma team
+ * Version: 1.1.2
  * Author: Nevma Team
  * Author URI: https://woocommerce.com/vendor/nevma/
  * Text Domain: nevma
@@ -107,6 +107,7 @@ class Donor {
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
+		add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
 	}
 
 	/**
@@ -182,8 +183,7 @@ class Donor {
 	 *
 	 * @return string The new Template file path.
 	 */
-	public function redirect_wc_template( $template, $template_name, $template_path ) {
-
+	public function redirect_wc_template( $template, $template_name, $template_path ) { // phpcs:ignore WordPress.UnusedFunctionParameter.Found
 		if ( 'form-checkout.php' === basename( $template ) ) {
 			$template = trailingslashit( plugin_dir_path( __FILE__ ) ) . 'woocommerce/checkout/form-checkout.php';
 		} elseif ( 'payment.php' === basename( $template ) ) {
