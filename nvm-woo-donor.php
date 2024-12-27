@@ -108,6 +108,7 @@ class Donor {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
 		add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
 		add_action( 'nvm_donor_before', array( $this, 'initiate_redirect_template' ), 10 );
+		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
 	}
 
 	/**
@@ -202,6 +203,27 @@ class Donor {
 
 		return $template;
 	}
+
+
+	public function nvm_customize_checkout_fields( $fields ) {
+
+		if ( is_page() && has_shortcode( get_post()->post_content, 'nevma_donation' ) ) {
+			unset( $fields['billing']['billing_company'] );
+			unset( $fields['billing']['billing_address_1'] );
+			unset( $fields['billing']['billing_address_2'] );
+			unset( $fields['billing']['billing_postcode'] );
+			unset( $fields['billing']['billing_state'] );
+
+			$fields['billing']['donation_message'] = array(
+				'type'     => 'textarea',
+				'label'    => __( 'Your Message', 'nvm-donation' ),
+				'required' => false,
+				'priority' => 22,
+			);
+		}
+		return $fields;
+	}
+
 
 
 
