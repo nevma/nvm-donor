@@ -41,19 +41,9 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 				<?php do_action( 'woocommerce_checkout_billing' ); ?>
 			</div>
 
-			<div class="col-2">
-				<h3 class="nvm checkout address">2. Διεύθυνση Αποστολής</h3>
-
-				<?php do_action( 'woocommerce_checkout_shipping' ); ?>
-			</div>
-
 			<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
 
-			<h3 class="nvm checkout shipping">3. Τρόποι Αποστολής</h3>
-
-			<?php do_action( 'nvm_woocommerce_checkout_payment_method' ); ?>
-
-			<h3 class="nvm checkout shipping">4. Τρόποι Πληρωμής</h3>
+			<h3 class="nvm checkout shipping">3. Τρόποι Πληρωμής</h3>
 
 			<?php do_action( 'nvm_woocommerce_checkout_shopping_method_action' ); ?>
 			<?php do_action( 'nvm_woocommerce_after_checkout_shopping_method' ); ?>
@@ -62,13 +52,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 	<?php endif; ?>
 
-	<?php do_action( 'woocommerce_checkout_before_order_review_heading' ); ?>
-
-	<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
-
-
 	<div id="order_review" class="woocommerce-checkout-review-order">
-		<h3 id="order_review_heading" class="nvm"><?php esc_html_e( 'Η Παραγγελία σας', 'woocommerce' ); ?></h3>
 		<div class="order_review_inside">
 			<?php do_action( 'woocommerce_checkout_order_review' ); ?>
 		</div>

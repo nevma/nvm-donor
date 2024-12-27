@@ -177,9 +177,10 @@ class Donor {
 
 	public function initiate_redirect_template() {
 
-		error_log( __METHOD__ );
-
 		add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
+
+		// remove coupon field on donor checkout
+		remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
 	}
 
 	/**
@@ -213,13 +214,6 @@ class Donor {
 			unset( $fields['billing']['billing_address_2'] );
 			unset( $fields['billing']['billing_postcode'] );
 			unset( $fields['billing']['billing_state'] );
-
-			$fields['billing']['donation_message'] = array(
-				'type'     => 'textarea',
-				'label'    => __( 'Your Message', 'nvm-donation' ),
-				'required' => false,
-				'priority' => 22,
-			);
 		}
 		return $fields;
 	}
