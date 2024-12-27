@@ -198,19 +198,13 @@ class Donor {
 
 
 	public function render_donation_form() {
+
 		ob_start();
+		do_action( 'nvm_donor_before' );
+		echo do_shortcode( '[woocommerce_checkout]' );
 		?>
-		<form method="POST" action="<?php echo esc_url( wc_get_cart_url() ); ?>">
-			<label for="donation-type">Επιλέξτε Τύπο Δωρεάς:</label>
-			<select id="donation-type" name="donation_type" required>
-				<option value="personal">Ατομική</option>
-				<option value="corporate">Εταιρική</option>
-				<option value="in-memory">Εις Μνήμη</option>
-			</select>
-			<!-- Εμφάνιση σχετικών πεδίων ανάλογα με την επιλογή -->
-			<button type="submit">Προσθήκη στο καλάθι</button>
-		</form>
 		<?php
+		do_action( 'nvm_donor_after' );
 		return ob_get_clean();
 	}
 
