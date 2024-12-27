@@ -105,9 +105,9 @@ class Donor {
 
 		// Scripts & Styles.
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
-		add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
 		add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
+		add_action( 'nvm_donor_before', array( $this, 'initiate_redirect_template' ), 10 );
 	}
 
 	/**
@@ -174,6 +174,13 @@ class Donor {
 		}
 	}
 
+	public function initiate_redirect_template() {
+
+		error_log( __METHOD__ );
+
+		add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
+	}
+
 	/**
 	 * Filter the cart template path to use cart.php in this plugin instead of the one in WooCommerce.
 	 *
@@ -184,6 +191,7 @@ class Donor {
 	 * @return string The new Template file path.
 	 */
 	public function redirect_wc_template( $template, $template_name, $template_path ) { // phpcs:ignore WordPress.UnusedFunctionParameter.Found
+
 		if ( 'form-checkout.php' === basename( $template ) ) {
 			$template = trailingslashit( plugin_dir_path( __FILE__ ) ) . 'woocommerce/checkout/form-checkout.php';
 		} elseif ( 'payment.php' === basename( $template ) ) {
