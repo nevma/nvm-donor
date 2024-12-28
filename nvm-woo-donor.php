@@ -186,11 +186,11 @@ class Donor {
 		?>
 		<!-- Donation Type -->
 		<p>
-			<label for="donation-type"><?php esc_html_e( 'Donation Type', 'text-domain' ); ?></label>
+			<label for="donation-type"><?php esc_html_e( 'Donation Type', 'nevma' ); ?></label>
 			<select id="donation-type" name="donation_type">
-				<option value="individual"><?php esc_html_e( 'Individual', 'text-domain' ); ?></option>
-				<option value="corporate"><?php esc_html_e( 'Corporate', 'text-domain' ); ?></option>
-				<option value="memoriam"><?php esc_html_e( 'In Memoriam', 'text-domain' ); ?></option>
+				<option value="individual"><?php esc_html_e( 'Individual', 'nevma' ); ?></option>
+				<option value="corporate"><?php esc_html_e( 'Corporate', 'nevma' ); ?></option>
+				<option value="memoriam"><?php esc_html_e( 'In Memoriam', 'nevma' ); ?></option>
 			</select>
 		</p>
 		<?php
@@ -198,7 +198,7 @@ class Donor {
 
 	public function add_donation_disc() {
 		?>
-		<span> Ασφαλείς Συναλλαγές. Η ιστοσελίδα μας προστατεύεται απο το reCAPTCHA και εφαρμόζονται οι Όροι Παροχής Υπηρεσιών και η Πολιτική Απορρήτου της Google. Secure Transactions. Our website is protected by reCAPTCHA and Google's Terms of Service and Privacy Policy apply. </span>
+		<span><?php echo esc_html__( 'Secure Transactions. Our website is protected by reCAPTCHA and Google\'s Terms of Service and Privacy Policy apply.', 'nevma' ); ?></span>
 		<?php
 	}
 
@@ -217,7 +217,7 @@ class Donor {
 				'10'     => '10€',
 				'25'     => '25€',
 				'50'     => '50€',
-				'custom' => 'Custom Amount', // Adding the custom option
+				'custom' => esc_html__( 'Custom Amount', 'nevma' ), // Adding the custom option
 			),
 			'default' => $chosen,
 		);
@@ -353,6 +353,17 @@ class Donor {
 	 * Runs on plugin uninstall.
 	 */
 	public static function on_plugin_uninstall() {
+	}
+
+	/**
+	 * Φόρτωση των μεταφράσεων
+	 */
+	public function load_plugin_textdomain() {
+		load_plugin_textdomain(
+			'nevma',
+			false,
+			dirname( plugin_basename( __FILE__ ) ) . '/languages'
+		);
 	}
 }
 
