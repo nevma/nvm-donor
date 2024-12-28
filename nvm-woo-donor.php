@@ -104,6 +104,7 @@ class Donor {
 		self::autoload();
 
 		// Scripts & Styles.
+		add_action( 'acf/init', array( $this, 'sync_acf_fields_from_json' ) );
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
 		add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_donation_form_to_checkout' ), 10 );
@@ -170,6 +171,37 @@ class Donor {
 		}
 	}
 
+	/**
+	 * Load and sync ACF fields from a JSON file.
+	 */
+	public function sync_acf_fields_from_json() {
+		// Path to your JSON file within the plugin directory.
+		$json_file_path = plugin_dir_path( __FILE__ ) . '/acf/donor-acf.json';
+
+		// Check if the file exists.
+		if ( ! file_exists( $json_file_path ) ) {
+			return;
+		}
+
+		// Decode the JSON file.
+		$json_content = file_get_contents( $json_file_path );
+		$field_groups = json_decode( $json_content, true );
+
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			return;
+		}
+
+		// Ensure ACF is active before syncing fields.
+		if ( ! function_exists( 'acf_add_local_field_group' ) ) {
+			return;
+		}
+
+		// Register each field group with ACF.
+		foreach ( $field_groups as $field_group ) {
+			acf_add_local_field_group( $field_group );
+		}
+	}
+
 	public function enqueue_donor_script() {
 		if ( is_checkout() ) {
 			wp_enqueue_style(
@@ -205,20 +237,39 @@ class Donor {
 
 	// Add a custom donation form to the checkout page
 	public function add_donation_form_to_checkout() {
-		$chosen = WC()->session->get( 'radio_chosen' );
-		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'radio_choice' ) : $chosen;
-		$chosen = empty( $chosen ) ? '0' : $chosen;
+		$chosen  = WC()->session->get( 'radio_chosen' );
+		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'radio_choice' ) : $chosen;
+		$chosen  = empty( $chosen ) ? '1' : $chosen;
+		$options = array();
+		$minimum = 1;
+
+		if ( class_exists( 'ACF' ) ) {
+			$minimum = get_field( 'minimun_amount', 'options' );
+
+			$array_donor = get_field( 'donor_prices', 'options' );
+			if ( ! empty( $array_donor ) ) {
+				foreach ( $array_donor as $donor ) {
+					$donor_amount             = $donor['amount'];
+					$options[ $donor_amount ] = $donor_amount . '€';
+				}
+			}
+		}
+
+		if ( empty( $options ) ) {
+			$options = array(
+				'5'  => '5€',
+				'10' => '10€',
+				'25' => '25€',
+				'50' => '50€',
+			);
+		}
+
+		$options['custom'] = esc_html__( 'Custom Amount', 'nevma' );
 
 		$args = array(
 			'type'    => 'radio',
 			'class'   => array( 'form-row-wide', 'update_totals_on_change' ),
-			'options' => array(
-				'5'      => '5€',
-				'10'     => '10€',
-				'25'     => '25€',
-				'50'     => '50€',
-				'custom' => esc_html__( 'Custom Amount', 'nevma' ), // Adding the custom option
-			),
+			'options' => $options,
 			'default' => $chosen,
 		);
 
@@ -228,7 +279,7 @@ class Donor {
 		// Add a custom field for entering a custom amount
 		echo '<div id="custom-donation-field" style="display: none;">';
 		echo '<label for="custom_donation_amount">Enter Custom Amount (€)</label>';
-		echo '<input type="number" name="custom_donation_amount" id="custom_donation_amount" class="input-text" min="1" step="0.01" />';
+		echo '<input type="number" name="custom_donation_amount" id="custom_donation_amount" class="input-text" min="' . $minimum . '" step="0.5" />';
 		echo '</div>';
 
 		echo '</div>';
