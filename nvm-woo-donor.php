@@ -106,7 +106,8 @@ class Donor {
 		// Scripts & Styles.
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
-		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donation_form_to_checkout' ), 10 );
+		add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_donation_form_to_checkout' ), 10 );
+		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donation_type' ), 10 );
 		add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
 		add_action( 'donor_before', array( $this, 'initiate_redirect_template' ), 10 );
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
@@ -177,12 +178,8 @@ class Donor {
 	}
 
 	// Add a custom donation form to the checkout page
-	public function add_donation_form_to_checkout() {
+	public function add_donation_type() {
 		?>
-	<div class="donation-form">
-		<h3><?php esc_html_e( 'Make a Donation', 'text-domain' ); ?></h3>
-		<p><?php esc_html_e( 'Your generosity supports our cause. Choose a donation type and amount below.', 'text-domain' ); ?></p>
-
 		<!-- Donation Type -->
 		<p>
 			<label for="donation-type"><?php esc_html_e( 'Donation Type', 'text-domain' ); ?></label>
@@ -192,7 +189,17 @@ class Donor {
 				<option value="memoriam"><?php esc_html_e( 'In Memoriam', 'text-domain' ); ?></option>
 			</select>
 		</p>
+		<?php
+	}
 
+
+
+	// Add a custom donation form to the checkout page
+	public function add_donation_form_to_checkout() {
+		?>
+	<span>Step A</span>
+	<div class="donation-form">
+		<h3><?php esc_html_e( 'Make a Donation', 'text-domain' ); ?></h3>
 		<!-- Donation Amount -->
 		<p>
 			<label><?php esc_html_e( 'Donation Amount', 'text-domain' ); ?></label><br>

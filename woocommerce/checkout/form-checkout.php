@@ -35,15 +35,17 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
 
+		<span>Ασφαλείς Συναλλαγές. Η ιστοσελίδα μας προστατεύεται απο το reCAPTCHA και εφαρμόζονται οι Όροι Παροχής Υπηρεσιών και η Πολιτική Απορρήτου της Google. Secure Transactions. Our website is protected by reCAPTCHA and Google's Terms of Service and Privacy Policy apply. </span>
+
 		<div class="" id="customer_details">
 			<div class="col-1">
-				<h3 class="nvm checkout billing">1. Στοιχεία χρέωσης</h3>
+				<h3 class="nvm checkout billing"><span>Step B</span></h3>
 				<?php do_action( 'woocommerce_checkout_billing' ); ?>
 			</div>
 
 			<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
 
-			<h3 class="nvm checkout shipping">3. Τρόποι Πληρωμής</h3>
+			<h3 class="nvm checkout shipping">Step C</h3>
 
 			<?php do_action( 'nvm_woocommerce_checkout_shopping_method_action' ); ?>
 			<?php do_action( 'nvm_woocommerce_after_checkout_shopping_method' ); ?>
