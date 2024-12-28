@@ -107,7 +107,11 @@ class Donor {
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
 		add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_donation_form_to_checkout' ), 10 );
+		add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_donation_disc' ), 50 );
 		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donation_type' ), 10 );
+		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_donation_to_cost' ), 10 );
+		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'checkout_radio_choice_set_session' ) );
+
 		add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
 		add_action( 'donor_before', array( $this, 'initiate_redirect_template' ), 10 );
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
@@ -192,54 +196,87 @@ class Donor {
 		<?php
 	}
 
+	public function add_donation_disc() {
+		?>
+		<span> Ασφαλείς Συναλλαγές. Η ιστοσελίδα μας προστατεύεται απο το reCAPTCHA και εφαρμόζονται οι Όροι Παροχής Υπηρεσιών και η Πολιτική Απορρήτου της Google. Secure Transactions. Our website is protected by reCAPTCHA and Google's Terms of Service and Privacy Policy apply. </span>
+		<?php
+	}
 
 
 	// Add a custom donation form to the checkout page
 	public function add_donation_form_to_checkout() {
+		$chosen = WC()->session->get( 'radio_chosen' );
+		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'radio_choice' ) : $chosen;
+		$chosen = empty( $chosen ) ? '0' : $chosen;
+
+		$args = array(
+			'type'    => 'radio',
+			'class'   => array( 'form-row-wide', 'update_totals_on_change' ),
+			'options' => array(
+				'5'      => '5€',
+				'10'     => '10€',
+				'25'     => '25€',
+				'50'     => '50€',
+				'custom' => 'Custom Amount', // Adding the custom option
+			),
+			'default' => $chosen,
+		);
+
+		echo '<div id="checkout-radio">';
+		woocommerce_form_field( 'radio_choice', $args, $chosen );
+
+		// Add a custom field for entering a custom amount
+		echo '<div id="custom-donation-field" style="display: none;">';
+		echo '<label for="custom_donation_amount">Enter Custom Amount (€)</label>';
+		echo '<input type="number" name="custom_donation_amount" id="custom_donation_amount" class="input-text" min="1" step="0.01" />';
+		echo '</div>';
+
+		echo '</div>';
+
+		// Include JavaScript to toggle visibility of the custom field
 		?>
-	<span>Step A</span>
-	<div class="donation-form">
-		<h3><?php esc_html_e( 'Make a Donation', 'text-domain' ); ?></h3>
-		<!-- Donation Amount -->
-		<p>
-			<label><?php esc_html_e( 'Donation Amount', 'text-domain' ); ?></label><br>
-			<label><input type="radio" name="donation_amount" value="5"> €5</label><br>
-			<label><input type="radio" name="donation_amount" value="10"> €10</label><br>
-			<label><input type="radio" name="donation_amount" value="25"> €25</label><br>
-			<label><input type="radio" name="donation_amount" value="50"> €50</label><br>
-			<label>
-				<input type="radio" name="donation_amount" value="custom">
-				<?php esc_html_e( 'Other Amount', 'text-domain' ); ?>
-				<input type="number" id="custom-donation-amount" name="custom_donation_amount" min="1" step="0.01" placeholder="<?php esc_attr_e( 'Enter amount', 'text-domain' ); ?>" disabled>
-			</label>
-		</p>
-	</div>
-
-	<script>
-		// Enable custom donation amount input when selected
-		document.addEventListener('DOMContentLoaded', function () {
-			const customAmountRadio = document.querySelector('input[name="donation_amount"][value="custom"]');
-			const customAmountInput = document.getElementById('custom-donation-amount');
-
-			customAmountRadio.addEventListener('change', function () {
-				if (this.checked) {
-					customAmountInput.disabled = false;
-					customAmountInput.focus();
+	<script type="text/javascript">
+		jQuery(document).ready(function($) {
+			$('input[name="radio_choice"]').change(function() {
+				if ($(this).val() === 'custom') {
+					$('#custom-donation-field').show();
+				} else {
+					$('#custom-donation-field').hide();
+					$('#custom_donation_amount').val(''); // Clear the custom amount field
 				}
 			});
 
-			document.querySelectorAll('input[name="donation_amount"]').forEach(function (radio) {
-				if (radio.value !== 'custom') {
-					radio.addEventListener('change', function () {
-						customAmountInput.disabled = true;
-						customAmountInput.value = '';
-					});
-				}
-			});
+			// Show custom field if "custom" is pre-selected
+			if ($('input[name="radio_choice"]:checked').val() === 'custom') {
+				$('#custom-donation-field').show();
+			}
 		});
 	</script>
 		<?php
 	}
+
+
+	// Add donation amount as a cart fee
+	public function add_donation_to_cost( $cart ) {
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+			return;
+		}
+
+		$radio = WC()->session->get( 'radio_chosen' );
+
+		if ( $radio ) {
+			$cart->add_fee( 'Option Fee', $radio );
+		}
+	}
+
+	public function checkout_radio_choice_set_session( $posted_data ) {
+		parse_str( $posted_data, $output );
+		if ( isset( $output['radio_choice'] ) ) {
+			WC()->session->set( 'radio_chosen', $output['radio_choice'] );
+		}
+	}
+
+
 
 	public function initiate_redirect_template() {
 
@@ -253,7 +290,7 @@ class Donor {
 	 * Filter the cart template path to use cart.php in this plugin instead of the one in WooCommerce.
 	 *
 	 * @param string $template      Default template file path.
-	 * @param string $template_name Template file slug.
+	 * @param string $template_name Template file slug. @phpcs:ignore
 	 * @param string $template_path Template file name.
 	 *
 	 * @return string The new Template file path.
