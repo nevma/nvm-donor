@@ -105,18 +105,21 @@ class Donor {
 
 		// Scripts & Styles.
 		add_action( 'acf/init', array( $this, 'sync_acf_fields_from_json' ) );
+
+		add_action( 'wp_head', array( $this, 'initiate_redirect_template' ) );
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
 
 		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'add_donation_fields_to_product' ) );
 		add_filter( 'woocommerce_add_cart_item_data', array( $this, 'save_donation_data' ), 10, 2 );
-		add_filter( 'woocommerce_get_item_data', array( $this, 'display_donation_in_cart' ), 10, 2 );
 		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'add_donation_to_order_items' ), 10, 4 );
 
 		add_filter( 'woocommerce_is_sold_individually', array( $this, 'remove_quantity_input_field' ), 10, 2 );
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'adjust_product_price_based_on_choice' ) );
 
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
+
+		add_action( 'woocommerce_add_to_cart', array( $this, 'redirect_to_checkout_for_specific_product' ), 50, 6 );
 	}
 
 	/**
@@ -172,6 +175,21 @@ class Donor {
 		}
 	}
 
+	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
+
+		// Target specific product for donations.
+		$target_product_id = $this->get_donor_product();
+
+		if ( $product_id === $target_product_id ) {
+			// Get the checkout URL
+			$checkout_url = wc_get_checkout_url();
+
+			// Redirect to the checkout page
+			wp_safe_redirect( $checkout_url );
+			exit;
+		}
+	}
+
 	/**
 	 * Load and sync ACF fields from a JSON file.
 	 */
@@ -204,15 +222,16 @@ class Donor {
 	}
 
 	public function enqueue_donor_script() {
-		if ( is_checkout() ) {
-			wp_enqueue_style(
-				'nvm-donor',
-				plugin_dir_url( __FILE__ ) . 'css/style.css',
-				array(),
-				self::$plugin_version
-			);
-		}
+		// if ( is_checkout() ) {
+		// wp_enqueue_style(
+		// 'nvm-donor',
+		// plugin_dir_url( __FILE__ ) . 'css/style.css',
+		// array(),
+		// self::$plugin_version
+		// );
+		// }
 	}
+
 
 	// Add a custom donation form to the checkout page
 	public function add_donation_type() {
@@ -255,7 +274,7 @@ class Donor {
 
 	public function get_donor_prices() {
 		$chosen  = WC()->session->get( 'radio_chosen' );
-		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'radio_choice' ) : $chosen;
+		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
 		$options = array();
 		$minimum = 1;
 
@@ -291,7 +310,7 @@ class Donor {
 		);
 
 		echo '<div id="donation-choices">';
-		woocommerce_form_field( 'radio_choice', $args, $chosen );
+		woocommerce_form_field( 'nvm_radio_choice', $args, $chosen );
 		echo '</div>';
 
 		echo '<div class="donation-fields">';
@@ -306,6 +325,8 @@ class Donor {
 			)
 		);
 		echo '</div>';
+
+		wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 	}
 
 	/**
@@ -340,41 +361,25 @@ class Donor {
 	 */
 	public function save_donation_data( $cart_item_data, $product_id ) {
 
-		if ( isset( $_POST['radio_choice'] ) && is_numeric( $_POST['radio_choice'] ) ) {
-			$cart_item_data['radio_choice'] = floatval( sanitize_text_field( $_POST['radio_choice'] ) );
+		if ( ! isset( $_POST['donation_form_nonce_field'] ) || ! wp_verify_nonce( $_POST['donation_form_nonce_field'], 'donation_form_nonce' ) ) {
+			wp_die();
+		}
 
-			if ( 'custom' === $_POST['radio_choice'] ) {
+		if ( isset( $_POST['nvm_radio_choice'] ) ) {
+
+			if ( 'custom' === $_POST['nvm_radio_choice'] ) {
 				if ( isset( $_POST['donation_amount'] ) && is_numeric( $_POST['donation_amount'] ) ) {
-					$cart_item_data['donation_amount'] = floatval( sanitize_text_field( $_POST['donation_amount'] ) );
+					$cart_item_data['nvm_radio_choice'] = floatval( $_POST['donation_amount'] );
 				}
+			}
+
+			if ( 'custom' !== $_POST['nvm_radio_choice'] ) {
+
+				$cart_item_data['nvm_radio_choice'] = floatval( sanitize_text_field( $_POST['nvm_radio_choice'] ) );
 			}
 		}
 
 		return $cart_item_data;
-	}
-
-	/**
-	 * Display donation in the cart.
-	 *
-	 * @param array $item_data Item data.
-	 * @param array $cart_item Cart item data.
-	 */
-	public function display_donation_in_cart( $item_data, $cart_item ) {
-		if ( ! empty( $cart_item['donation_amount'] ) ) {
-			$item_data[] = array(
-				'key'   => __( 'Donation Amount', 'nevma' ),
-				'value' => wc_price( $cart_item['donation_amount'] ),
-			);
-		}
-
-		if ( ! empty( $cart_item['radio_choice'] ) ) {
-			$item_data[] = array(
-				'key'   => __( 'Donation Amount', 'nevma' ),
-				'value' => wc_price( $cart_item['radio_choice'] ),
-			);
-		}
-
-		return $item_data;
 	}
 
 	/**
@@ -383,23 +388,22 @@ class Donor {
 	 * @param WC_Cart $cart The WooCommerce cart object.
 	 */
 	public function adjust_product_price_based_on_choice( $cart ) {
-		if ( is_admin() || ! defined( 'DOING_AJAX' ) || DOING_AJAX ) {
+
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			return;
 		}
 
-		// Ensure cart is loaded.
-		if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
-			return;
-		}
+		if ( ! WC()->cart->is_empty() ) {
 
-		foreach ( $cart->get_cart() as $cart_item ) {
-			if ( isset( $cart_item['radio_choice'] ) ) {
-				$new_price = $cart_item['radio_choice']; // The new price from radio choice.
-				$cart_item['data']->set_price( $new_price );
+			foreach ( $cart->get_cart() as $cart_item ) {
+
+				if ( isset( $cart_item['nvm_radio_choice'] ) ) {
+					$new_price = $cart_item['nvm_radio_choice']; // The new price from radio choice.
+					$cart_item['data']->set_price( $new_price );
+				}
 			}
 		}
 	}
-
 
 	/**
 	 * Add donation data to order items.
@@ -411,23 +415,33 @@ class Donor {
 	 */
 	public function add_donation_to_order_items( $item, $cart_item_key, $values, $order ) {
 
-		if ( isset( $values['radio_choice'] ) ) {
-			if ( 'custom' === $values['radio_choice'] ) {
-				$item->add_meta_data( __( 'radio_choice', 'nevma' ), $values['donation_amount'] );
-			}
-			if ( 'custom' !== $values['radio_choice'] ) {
-				$item->add_meta_data( __( 'radio_choice', 'nevma' ), $values['radio_choice'] );
-			}
+		if ( isset( $values['nvm_radio_choice'] ) ) {
+
+			$item->add_meta_data( __( 'nvm_radio_choice', 'nevma' ), $values['nvm_radio_choice'] );
 		}
 	}
 
 
 	public function initiate_redirect_template() {
 
-		add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
+		$has_donor_product = false;
+		$target_product_id = $this->get_donor_product();
 
-		// remove coupon field on donor checkout
-		remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( isset( $cart_item['data'] ) && $cart_item['data']->get_id() === $target_product_id ) {
+				$has_donor_product = true;
+				break;
+			}
+		}
+
+		// If the cart contains the "donor" product, remove specific billing fields
+		if ( $has_donor_product ) {
+
+			add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
+
+			// remove coupon field on donor checkout
+			remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+		}
 	}
 
 	/**
@@ -452,17 +466,13 @@ class Donor {
 		return $template;
 	}
 
-
 	public function nvm_customize_checkout_fields( $fields ) {
 
-		if ( is_page() && has_shortcode( get_post()->post_content, 'nevma_donation' ) ) {
 			unset( $fields['billing']['billing_company'] );
 			unset( $fields['billing']['billing_address_1'] );
 			unset( $fields['billing']['billing_address_2'] );
 			unset( $fields['billing']['billing_postcode'] );
 			unset( $fields['billing']['billing_state'] );
-		}
-		return $fields;
 	}
 
 	public function render_donation_form() {
