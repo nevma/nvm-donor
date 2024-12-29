@@ -107,14 +107,11 @@ class Donor {
 		add_action( 'acf/init', array( $this, 'sync_acf_fields_from_json' ) );
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
-		add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_donation_form_to_checkout' ), 10 );
-		add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_donation_disc' ), 50 );
+		// add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_donation_disc' ), 50 );
 		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donation_type' ), 10 );
-		add_action( 'woocommerce_cart_calculate_fees', array( $this, 'add_donation_to_cost' ), 10 );
-		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'checkout_radio_choice_set_session' ) );
 
-		add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
-		add_action( 'donor_before', array( $this, 'initiate_redirect_template' ), 10 );
+		// add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
+
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
 	}
 
@@ -239,7 +236,6 @@ class Donor {
 	public function add_donation_form_to_checkout() {
 		$chosen  = WC()->session->get( 'radio_chosen' );
 		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'radio_choice' ) : $chosen;
-		$chosen  = empty( $chosen ) ? '1' : $chosen;
 		$options = array();
 		$minimum = 1;
 
@@ -265,6 +261,7 @@ class Donor {
 		}
 
 		$options['custom'] = esc_html__( 'Custom Amount', 'nevma' );
+		$chosen            = empty( $chosen ) ? array_key_first( $options ) : array_key_first( $options );
 
 		$args = array(
 			'type'    => 'radio',
@@ -273,16 +270,22 @@ class Donor {
 			'default' => $chosen,
 		);
 
+		echo '<!-- Product Selection Form -->';
+		echo '<form method="post" class="add-to-cart-form">';
 		echo '<div id="checkout-radio">';
 		woocommerce_form_field( 'radio_choice', $args, $chosen );
 
 		// Add a custom field for entering a custom amount
 		echo '<div id="custom-donation-field" style="display: none;">';
 		echo '<label for="custom_donation_amount">Enter Custom Amount (€)</label>';
-		echo '<input type="number" name="custom_donation_amount" id="custom_donation_amount" class="input-text" min="' . $minimum . '" step="0.5" />';
+		echo '<input type="number" name="custom_donation_amount" id="custom_donation_amount" class="input-text" min="' . esc_html( $minimum ) . '" step="0.5" />';
 		echo '</div>';
 
 		echo '</div>';
+
+		echo '<button type="submit" name="nvm_add_to_cart">Add to Cart</button>';
+
+		echo '</form>';
 
 		// Include JavaScript to toggle visibility of the custom field
 		?>
@@ -296,7 +299,6 @@ class Donor {
 					$('#custom_donation_amount').val(''); // Clear the custom amount field
 				}
 			});
-
 			// Show custom field if "custom" is pre-selected
 			if ($('input[name="radio_choice"]:checked').val() === 'custom') {
 				$('#custom-donation-field').show();
@@ -305,29 +307,6 @@ class Donor {
 	</script>
 		<?php
 	}
-
-
-	// Add donation amount as a cart fee
-	public function add_donation_to_cost( $cart ) {
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-			return;
-		}
-
-		$radio = WC()->session->get( 'radio_chosen' );
-
-		if ( $radio ) {
-			$cart->add_fee( 'Option Fee', $radio );
-		}
-	}
-
-	public function checkout_radio_choice_set_session( $posted_data ) {
-		parse_str( $posted_data, $output );
-		if ( isset( $output['radio_choice'] ) ) {
-			WC()->session->set( 'radio_chosen', $output['radio_choice'] );
-		}
-	}
-
-
 
 	public function initiate_redirect_template() {
 
@@ -379,6 +358,7 @@ class Donor {
 
 		ob_start();
 		do_action( 'donor_before' );
+		do_action( 'donor_product' );
 		echo do_shortcode( '[woocommerce_checkout]' );
 		?>
 		<?php
