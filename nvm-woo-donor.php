@@ -111,6 +111,8 @@ class Donor {
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
 
 		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'add_donation_fields_to_product' ) );
+		add_action( 'woocommerce_product_meta_start', array( $this, 'add_content_after_addtocart_button' ), 20 );
+
 		add_filter( 'woocommerce_add_cart_item_data', array( $this, 'save_donation_data' ), 10, 2 );
 		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'add_donation_to_order_items' ), 10, 4 );
 
@@ -118,6 +120,9 @@ class Donor {
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'adjust_product_price_based_on_choice' ) );
 
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
+
+		// Change add to cart text on single product page
+		add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'add_to_cart_button_text_single' ) );
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'redirect_to_checkout_for_specific_product' ), 50, 6 );
 	}
@@ -317,17 +322,37 @@ class Donor {
 		woocommerce_form_field(
 			'donation_amount',
 			array(
-				'type'        => 'number',
-				'label'       => __( 'Donation Amount (€)', 'nevma' ),
-				'required'    => false,
-				'class'       => array( 'form-row-wide' ),
-				'placeholder' => __( 'Enter an amount', 'nevma' ),
+				'type'              => 'number',
+				'label'             => __( 'Donation Amount (€)', 'nevma' ),
+				'required'          => false,
+				'class'             => array( 'form-row-wide' ),
+				'placeholder'       => __( 'Enter an amount', 'nevma' ),
+				'custom_attributes' => array(
+					'min' => $minimum,
+				),
 			)
 		);
+		echo '<span>' . __( 'Minimun Amount:', 'nevma' ) . ' ' . $minimum . '€</span>';
 		echo '</div>';
 
 		wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 	}
+
+	public function add_to_cart_button_text_single() {
+		return __( 'Donor Amount', 'nevma' );
+	}
+
+	public function add_content_after_addtocart_button() {
+
+		if ( class_exists( 'ACF' ) ) {
+			$donor_text = get_field( 'text_after', 'options' );
+
+			echo '<span class="safe">';
+			echo $donor_text;
+			echo '</span>';
+		}
+	}
+
 
 	/**
 	 * Add donation fields to the product page.
