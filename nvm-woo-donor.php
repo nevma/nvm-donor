@@ -107,10 +107,11 @@ class Donor {
 		add_action( 'acf/init', array( $this, 'sync_acf_fields_from_json' ) );
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
-		// add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'add_donation_disc' ), 50 );
-		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donation_type' ), 10 );
 
-		// add_shortcode( 'nevma_donation', array( $this, 'render_donation_form' ), 10 );
+		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'add_donation_fields_to_product' ) );
+		add_filter( 'woocommerce_add_cart_item_data', array( $this, 'save_donation_data' ), 10, 2 );
+		add_filter( 'woocommerce_get_item_data', array( $this, 'display_donation_in_cart' ), 10, 2 );
+		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'add_donation_to_order_items' ), 10, 4 );
 
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
 	}
@@ -225,88 +226,86 @@ class Donor {
 		<?php
 	}
 
-	public function add_donation_disc() {
-		?>
-		<span><?php echo esc_html__( 'Secure Transactions. Our website is protected by reCAPTCHA and Google\'s Terms of Service and Privacy Policy apply.', 'nevma' ); ?></span>
-		<?php
-	}
-
-
-	// Add a custom donation form to the checkout page
-	public function add_donation_form_to_checkout() {
-		$chosen  = WC()->session->get( 'radio_chosen' );
-		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'radio_choice' ) : $chosen;
-		$options = array();
-		$minimum = 1;
-
+	public function get_donor_product() {
 		if ( class_exists( 'ACF' ) ) {
-			$minimum = get_field( 'minimun_amount', 'options' );
+			$donor_product_id = get_field( 'product', 'options' );
 
-			$array_donor = get_field( 'donor_prices', 'options' );
-			if ( ! empty( $array_donor ) ) {
-				foreach ( $array_donor as $donor ) {
-					$donor_amount             = $donor['amount'];
-					$options[ $donor_amount ] = $donor_amount . '€';
-				}
-			}
+			return $donor_product_id;
 		}
 
-		if ( empty( $options ) ) {
-			$options = array(
-				'5'  => '5€',
-				'10' => '10€',
-				'25' => '25€',
-				'50' => '50€',
+		return false;
+	}
+
+	/**
+	 * Add donation fields to the product page.
+	 */
+	public function add_donation_fields_to_product() {
+		global $product;
+
+		// Target specific product for donations.
+		$target_product_id = $this->get_donor_product();
+
+		if ( $product->get_id() !== $target_product_id ) {
+			return;
+		}
+
+		echo '<div class="donation-fields">';
+		woocommerce_form_field(
+			'donation_amount',
+			array(
+				'type'        => 'number',
+				'label'       => __( 'Donation Amount (€)', 'nevma' ),
+				'required'    => false,
+				'class'       => array( 'form-row-wide' ),
+				'placeholder' => __( 'Enter an amount', 'nevma' ),
+			)
+		);
+		echo '</div>';
+	}
+
+	/**
+	 * Save donation data to cart item.
+	 *
+	 * @param array $cart_item_data Cart item data.
+	 * @param int   $product_id Product ID.
+	 */
+	public function save_donation_data( $cart_item_data, $product_id ) {
+		if ( isset( $_POST['donation_amount'] ) && is_numeric( $_POST['donation_amount'] ) ) {
+			$cart_item_data['donation_amount'] = floatval( sanitize_text_field( $_POST['donation_amount'] ) );
+		}
+		return $cart_item_data;
+	}
+
+	/**
+	 * Display donation in the cart.
+	 *
+	 * @param array $item_data Item data.
+	 * @param array $cart_item Cart item data.
+	 */
+	public function display_donation_in_cart( $item_data, $cart_item ) {
+		if ( ! empty( $cart_item['donation_amount'] ) ) {
+			$item_data[] = array(
+				'key'   => __( 'Donation Amount', 'nevma' ),
+				'value' => wc_price( $cart_item['donation_amount'] ),
 			);
 		}
-
-		$options['custom'] = esc_html__( 'Custom Amount', 'nevma' );
-		$chosen            = empty( $chosen ) ? array_key_first( $options ) : array_key_first( $options );
-
-		$args = array(
-			'type'    => 'radio',
-			'class'   => array( 'form-row-wide', 'update_totals_on_change' ),
-			'options' => $options,
-			'default' => $chosen,
-		);
-
-		echo '<!-- Product Selection Form -->';
-		echo '<form method="post" class="add-to-cart-form">';
-		echo '<div id="checkout-radio">';
-		woocommerce_form_field( 'radio_choice', $args, $chosen );
-
-		// Add a custom field for entering a custom amount
-		echo '<div id="custom-donation-field" style="display: none;">';
-		echo '<label for="custom_donation_amount">Enter Custom Amount (€)</label>';
-		echo '<input type="number" name="custom_donation_amount" id="custom_donation_amount" class="input-text" min="' . esc_html( $minimum ) . '" step="0.5" />';
-		echo '</div>';
-
-		echo '</div>';
-
-		echo '<button type="submit" name="nvm_add_to_cart">Add to Cart</button>';
-
-		echo '</form>';
-
-		// Include JavaScript to toggle visibility of the custom field
-		?>
-	<script type="text/javascript">
-		jQuery(document).ready(function($) {
-			$('input[name="radio_choice"]').change(function() {
-				if ($(this).val() === 'custom') {
-					$('#custom-donation-field').show();
-				} else {
-					$('#custom-donation-field').hide();
-					$('#custom_donation_amount').val(''); // Clear the custom amount field
-				}
-			});
-			// Show custom field if "custom" is pre-selected
-			if ($('input[name="radio_choice"]:checked').val() === 'custom') {
-				$('#custom-donation-field').show();
-			}
-		});
-	</script>
-		<?php
+		return $item_data;
 	}
+
+	/**
+	 * Add donation data to order items.
+	 *
+	 * @param \WC_Order_Item $item Order item.
+	 * @param string         $cart_item_key Cart item key.
+	 * @param array          $values Cart item data.
+	 * @param \WC_Order      $order Order object.
+	 */
+	public function add_donation_to_order_items( $item, $cart_item_key, $values, $order ) {
+		if ( isset( $values['donation_amount'] ) ) {
+			$item->add_meta_data( __( 'Donation Amount', 'nevma' ), $values['donation_amount'] );
+		}
+	}
+
 
 	public function initiate_redirect_template() {
 
@@ -350,9 +349,6 @@ class Donor {
 		}
 		return $fields;
 	}
-
-
-
 
 	public function render_donation_form() {
 
