@@ -113,6 +113,9 @@ class Donor {
 		add_filter( 'woocommerce_get_item_data', array( $this, 'display_donation_in_cart' ), 10, 2 );
 		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'add_donation_to_order_items' ), 10, 4 );
 
+		add_filter( 'woocommerce_is_sold_individually', array( $this, 'remove_quantity_input_field' ), 10, 2 );
+		add_action( 'woocommerce_before_calculate_totals', array( $this, 'adjust_product_price_based_on_choice' ) );
+
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
 	}
 
@@ -226,6 +229,20 @@ class Donor {
 		<?php
 	}
 
+	public function remove_quantity_input_field( $return, $product ) {
+
+		if ( is_product() ) {
+
+			$target_product_id = $this->get_donor_product();
+
+			if ( $product->get_id() === $target_product_id ) {
+				return true;
+			}
+		}
+		return $return;
+	}
+
+
 	public function get_donor_product() {
 		if ( class_exists( 'ACF' ) ) {
 			$donor_product_id = get_field( 'product', 'options' );
@@ -236,18 +253,46 @@ class Donor {
 		return false;
 	}
 
-	/**
-	 * Add donation fields to the product page.
-	 */
-	public function add_donation_fields_to_product() {
-		global $product;
+	public function get_donor_prices() {
+		$chosen  = WC()->session->get( 'radio_chosen' );
+		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'radio_choice' ) : $chosen;
+		$options = array();
+		$minimum = 1;
 
-		// Target specific product for donations.
-		$target_product_id = $this->get_donor_product();
+		if ( class_exists( 'ACF' ) ) {
+			$minimum = get_field( 'minimun_amount', 'options' );
 
-		if ( $product->get_id() !== $target_product_id ) {
-			return;
+			$array_donor = get_field( 'donor_prices', 'options' );
+			if ( ! empty( $array_donor ) ) {
+				foreach ( $array_donor as $donor ) {
+					$donor_amount             = $donor['amount'];
+					$options[ $donor_amount ] = $donor_amount . '€';
+				}
+			}
 		}
+
+		if ( empty( $options ) ) {
+			$options = array(
+				'5'  => '5€',
+				'10' => '10€',
+				'25' => '25€',
+				'50' => '50€',
+			);
+		}
+
+		$options['custom'] = esc_html__( 'Custom Amount', 'nevma' );
+		$chosen            = empty( $chosen ) ? array_key_first( $options ) : $chosen;
+
+		$args = array(
+			'type'    => 'radio',
+			'class'   => array( 'form-row-wide' ),
+			'options' => $options,
+			'default' => $chosen,
+		);
+
+		echo '<div id="donation-choices">';
+		woocommerce_form_field( 'radio_choice', $args, $chosen );
+		echo '</div>';
 
 		echo '<div class="donation-fields">';
 		woocommerce_form_field(
@@ -264,15 +309,47 @@ class Donor {
 	}
 
 	/**
+	 * Add donation fields to the product page.
+	 */
+	public function add_donation_fields_to_product() {
+		global $product;
+
+		// Target specific product for donations.
+		$target_product_id = $this->get_donor_product();
+
+		if ( $product->get_id() !== $target_product_id ) {
+			return;
+		}
+
+		$this->get_donor_prices();
+		?>
+		<style>
+			.woocommerce form .form-row label,
+			.woocommerce-page form .form-row label {
+				display: inline-block;
+			}
+		</style>
+		<?php
+	}
+
+	/**
 	 * Save donation data to cart item.
 	 *
 	 * @param array $cart_item_data Cart item data.
 	 * @param int   $product_id Product ID.
 	 */
 	public function save_donation_data( $cart_item_data, $product_id ) {
-		if ( isset( $_POST['donation_amount'] ) && is_numeric( $_POST['donation_amount'] ) ) {
-			$cart_item_data['donation_amount'] = floatval( sanitize_text_field( $_POST['donation_amount'] ) );
+
+		if ( isset( $_POST['radio_choice'] ) && is_numeric( $_POST['radio_choice'] ) ) {
+			$cart_item_data['radio_choice'] = floatval( sanitize_text_field( $_POST['radio_choice'] ) );
+
+			if ( 'custom' === $_POST['radio_choice'] ) {
+				if ( isset( $_POST['donation_amount'] ) && is_numeric( $_POST['donation_amount'] ) ) {
+					$cart_item_data['donation_amount'] = floatval( sanitize_text_field( $_POST['donation_amount'] ) );
+				}
+			}
 		}
+
 		return $cart_item_data;
 	}
 
@@ -289,8 +366,40 @@ class Donor {
 				'value' => wc_price( $cart_item['donation_amount'] ),
 			);
 		}
+
+		if ( ! empty( $cart_item['radio_choice'] ) ) {
+			$item_data[] = array(
+				'key'   => __( 'Donation Amount', 'nevma' ),
+				'value' => wc_price( $cart_item['radio_choice'] ),
+			);
+		}
+
 		return $item_data;
 	}
+
+	/**
+	 * Adjust product price based on radio choice.
+	 *
+	 * @param WC_Cart $cart The WooCommerce cart object.
+	 */
+	public function adjust_product_price_based_on_choice( $cart ) {
+		if ( is_admin() || ! defined( 'DOING_AJAX' ) || DOING_AJAX ) {
+			return;
+		}
+
+		// Ensure cart is loaded.
+		if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
+			return;
+		}
+
+		foreach ( $cart->get_cart() as $cart_item ) {
+			if ( isset( $cart_item['radio_choice'] ) ) {
+				$new_price = $cart_item['radio_choice']; // The new price from radio choice.
+				$cart_item['data']->set_price( $new_price );
+			}
+		}
+	}
+
 
 	/**
 	 * Add donation data to order items.
@@ -301,8 +410,14 @@ class Donor {
 	 * @param \WC_Order      $order Order object.
 	 */
 	public function add_donation_to_order_items( $item, $cart_item_key, $values, $order ) {
-		if ( isset( $values['donation_amount'] ) ) {
-			$item->add_meta_data( __( 'Donation Amount', 'nevma' ), $values['donation_amount'] );
+
+		if ( isset( $values['radio_choice'] ) ) {
+			if ( 'custom' === $values['radio_choice'] ) {
+				$item->add_meta_data( __( 'radio_choice', 'nevma' ), $values['donation_amount'] );
+			}
+			if ( 'custom' !== $values['radio_choice'] ) {
+				$item->add_meta_data( __( 'radio_choice', 'nevma' ), $values['radio_choice'] );
+			}
 		}
 	}
 
