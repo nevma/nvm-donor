@@ -89,7 +89,7 @@ class Donor {
 	public function __construct() {
 
 		// Set the plugin version.
-		self::$plugin_version = '0.0.1';
+		self::$plugin_version = '0.0.2';
 
 		// Set the plugin namespace.
 		self::$namespace_prefix = 'Nvm\\Donor';
