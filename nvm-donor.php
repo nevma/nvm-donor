@@ -19,6 +19,9 @@
  */
 namespace Nvm;
 
+use Nvm\Donor\Nvm_Acf as N_ACF;
+
+
 /**
  * Check that the file is not accessed directly.
  */
@@ -102,14 +105,7 @@ class Donor {
 
 		// Autoload.
 		self::autoload();
-
-		// Sync and load ACF Options
-		// Option page
-		add_filter( 'acf/settings/load_json/key=ui_options_page_67703a1d20bc6', array( $this, 'acf_json_load_point' ) );
-		add_filter( 'acf/settings/save_json/key=ui_options_page_67703a1d20bc6', array( $this, 'acf_json_save_point' ) );
-		// Options fields
-		add_filter( 'acf/settings/load_json/key=group_67703a308369d', array( $this, 'acf_json_load_point' ) );
-		add_filter( 'acf/settings/save_json/key=group_67703a308369d', array( $this, 'acf_json_save_point' ) );
+		self::initiate_more_acf();
 
 		// Declare HPOS Compability
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
@@ -156,13 +152,15 @@ class Donor {
 				$path           = explode( '\\', strtolower( str_replace( '_', '-', $relative_class ) ) );
 				$file           = array_pop( $path );
 				$file           = self::$plugin_dir . 'classes/class-' . $file . '.php';
+				error_log( '$file:' );
+				error_log( print_r( $file, true ) );
 
 				if ( file_exists( $file ) ) {
 					require $file;
 				}
 
 				// add the autoload.php file for the prefixed vendor folder.
-				require self::$plugin_dir . '/prefixed/vendor/autoload.php';
+				require self::$plugin_dir . 'prefixed/vendor/autoload.php';
 			}
 		);
 	}
@@ -191,6 +189,10 @@ class Donor {
 		}
 	}
 
+	public function initiate_more_acf() {
+		new N_ACF();
+	}
+
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
 
 		// Target specific product for donations.
@@ -204,31 +206,6 @@ class Donor {
 			wp_safe_redirect( $checkout_url );
 			exit;
 		}
-	}
-
-	/**
-	 * Defines the JSON loading point for Advanced Custom Fields (ACF).
-	 *
-	 * This method modifies the path where ACF looks for its JSON field files.
-	 * It removes the default path and adds a new path to the plugin's 'acf'
-	 * directory.
-	 *
-	 * @param array $paths An array of existing JSON loading paths.
-	 * @return array The modified paths array with the new plugin path.
-	 *
-	 * @filter acf/settings/load_json
-	 * @since 1.0.0
-	 */
-	public function acf_json_load_point( $paths ) {
-		unset( $paths[0] );
-		// Append path to load JSON from your plugin
-		$paths[] = plugin_dir_path( __FILE__ ) . 'acf/';
-		return $paths;
-	}
-
-	public function acf_json_save_point( $path ) {
-		$path = plugin_dir_path( __FILE__ ) . 'acf/';
-		return $path;
 	}
 
 	public function enqueue_donor_script() {
