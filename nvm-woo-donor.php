@@ -143,16 +143,16 @@ class Donor {
 	 */
 	public static function autoload() {
 		spl_autoload_register(
-			function ( $class ) {
+			function ( $classes ) {
 
 				$prefix = self::$namespace_prefix;
 				$len    = strlen( $prefix );
 
-				if ( 0 !== strncmp( $prefix, $class, $len ) ) {
+				if ( 0 !== strncmp( $prefix, $classes, $len ) ) {
 					return;
 				}
 
-				$relative_class = substr( $class, $len );
+				$relative_class = substr( $classes, $len );
 				$path           = explode( '\\', strtolower( str_replace( '_', '-', $relative_class ) ) );
 				$file           = array_pop( $path );
 				$file           = self::$plugin_dir . 'classes/class-' . $file . '.php';
@@ -206,6 +206,19 @@ class Donor {
 		}
 	}
 
+	/**
+	 * Defines the JSON loading point for Advanced Custom Fields (ACF).
+	 *
+	 * This method modifies the path where ACF looks for its JSON field files.
+	 * It removes the default path and adds a new path to the plugin's 'acf'
+	 * directory.
+	 *
+	 * @param array $paths An array of existing JSON loading paths.
+	 * @return array The modified paths array with the new plugin path.
+	 *
+	 * @filter acf/settings/load_json
+	 * @since 1.0.0
+	 */
 	public function acf_json_load_point( $paths ) {
 		unset( $paths[0] );
 		// Append path to load JSON from your plugin
