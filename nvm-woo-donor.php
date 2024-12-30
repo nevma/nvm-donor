@@ -521,6 +521,13 @@ class Donor {
 
 		?>
 
+		<style>
+			.woocommerce form .form-row label,
+			.woocommerce-page form .form-row label {
+				display: inline-block;
+			}
+		</style>
+
 	<script type="text/javascript">
 		document.addEventListener('DOMContentLoaded', function () {
 			const orderTypeRadios = document.querySelectorAll('input[name="type_of_donation"]');
