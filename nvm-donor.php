@@ -21,6 +21,8 @@ namespace Nvm;
 
 use Nvm\Donor\Acf as Nvm_Acf;
 use Nvm\Donor\Product as Nvm_Product;
+use Nvm\Donor\Checkout as Nvm_Checkout;
+
 
 
 /**
@@ -108,13 +110,11 @@ class Donor {
 		self::autoload();
 		self::initiate_acf_options();
 		self::initiate_product_donor();
+		self::initiate_checkout_donor();
 
 		// Declare HPOS Compability
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
-
-		// Checkout settings
-		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donors_ways' ) );
 	}
 
 	/**
@@ -141,7 +141,7 @@ class Donor {
 				}
 
 				// add the autoload.php file for the prefixed vendor folder.
-				require self::$plugin_dir . 'prefixed/autoload.php';
+				require self::$plugin_dir . 'prefixed/vendor/autoload.php';
 			}
 		);
 	}
@@ -178,6 +178,11 @@ class Donor {
 		$init = new Nvm_Product();
 	}
 
+	public function initiate_checkout_donor() {
+		$init = new Nvm_Checkout();
+	}
+
+
 
 
 	public function enqueue_donor_script() {
@@ -189,71 +194,6 @@ class Donor {
 		// self::$plugin_version
 		// );
 		// }
-	}
-
-
-
-
-	public function customize_checkout_fields( $fields ) {
-
-			unset( $fields['billing']['billing_company'] );
-			unset( $fields['billing']['billing_address_1'] );
-			unset( $fields['billing']['billing_address_2'] );
-			unset( $fields['billing']['billing_postcode'] );
-			unset( $fields['billing']['billing_state'] );
-
-		return $fields;
-	}
-
-	public function add_donors_ways() {
-
-		$chosen = WC()->session->get( 'donation' );
-		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'donation' ) : $chosen;
-
-		$options = array(
-			'individual' => __( 'ΑΤΟΜΙΚΗ ΔΩΡΕΑ', 'nevma' ),
-			'corporate'  => __( 'ΕΤΑΙΡΙΚΗ ΔΩΡΕΑ', 'nevma' ),
-			'memoriam'   => __( 'ΔΩΡΕΑ ΕΙΣ ΜΝΗΜΗ', 'nevma' ),
-		);
-
-		$args = array(
-			'type'    => 'radio',
-			'class'   => array( 'form-row-wide', 'donation-type' ),
-			'options' => $options,
-			'default' => array_key_first( $options ),
-		);
-
-		echo '<div id="donation-choices">';
-		woocommerce_form_field( 'type_of_donation', $args, $chosen );
-		echo '</div>';
-
-		?>
-
-		<style>
-			.woocommerce form .form-row label,
-			.woocommerce-page form .form-row label {
-				display: inline-block;
-			}
-		</style>
-
-	<script type="text/javascript">
-		document.addEventListener('DOMContentLoaded', function () {
-			const orderTypeRadios = document.querySelectorAll('input[name="type_of_donation"]');
-
-			function updateDisplay() {
-				const selectedValue = document.querySelector('input[name="type_of_donation"]:checked').value;
-				const displayStyle = selectedValue === 'timologio' ? 'block' : 'none';
-				document.querySelectorAll('.timologio').forEach(el => el.style.display = displayStyle);
-			}
-
-			// Check initially before any clicks
-			updateDisplay();
-
-			// Update display on radio button change
-			orderTypeRadios.forEach(radio => radio.addEventListener('click', updateDisplay));
-		});
-	</script>
-		<?php
 	}
 
 	/**

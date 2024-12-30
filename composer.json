@@ -30,6 +30,6 @@
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true
 		},
-		"vendor-dir": "prefixed"
+		"vendor-dir": "prefixed/vendor"
 	}
 }

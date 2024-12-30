@@ -62,7 +62,6 @@ class Product {
 
 			// remove coupon field on donor checkout
 			remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
-			add_filter( 'woocommerce_checkout_fields', array( $this, 'customize_checkout_fields' ), 10 );
 
 		}
 	}
