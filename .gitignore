@@ -1,12 +1,11 @@
-/.DS_Store
-.DS_Store
+**/.DS_Store
 /node_modules
 /build
-/vendor
+/prefixed/vendor
 composer.lock
 composer.phar
 .phpunit.result.cache
 
 # Εξαιρέσεις για το autoload
-!/prefixed/autoload.php
-!/prefixed/composer/autoload_*
+!/prefixed/vendor/autoload.php
+!/prefixed/vendor/composer/autoload_*
