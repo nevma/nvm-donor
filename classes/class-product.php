@@ -18,8 +18,6 @@ class Product {
 
 	public function __construct() {
 
-		add_action( 'wp_header', array( $this, 'initiate_redirect_template' ) );
-
 		// Change add to cart text on single product page
 		add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'add_to_cart_button_text_single' ) );
 		// Add Fields to product
@@ -38,33 +36,6 @@ class Product {
 		add_action( 'woocommerce_add_to_cart', array( $this, 'redirect_to_checkout_for_specific_product' ), 50, 6 );
 	}
 
-
-	public function initiate_redirect_template() {
-
-		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
-			return;
-		}
-
-		$has_donor_product = false;
-		$target_product_id = $this->get_donor_product();
-
-		foreach ( WC()->cart->get_cart() as $cart_item ) {
-			if ( isset( $cart_item['data'] ) && $cart_item['data']->get_id() === $target_product_id ) {
-				$has_donor_product = true;
-				break;
-			}
-		}
-
-		// If the cart contains the "donor" product, remove specific billing fields
-		if ( $has_donor_product ) {
-
-			add_filter( 'woocommerce_locate_template', array( $this, 'redirect_wc_template' ), 10, 3 );
-
-			// remove coupon field on donor checkout
-			remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
-
-		}
-	}
 
 	public function remove_quantity_input_field( $return, $product ) {
 
@@ -257,29 +228,6 @@ class Product {
 
 			$item->add_meta_data( __( 'nvm_radio_choice', 'nevma' ), $values['nvm_radio_choice'] );
 		}
-	}
-
-
-		/**
-		 * Filter the cart template path to use cart.php in this plugin instead of the one in WooCommerce.
-		 *
-		 * @param string $template      Default template file path.
-		 * @param string $template_name Template file slug. @phpcs:ignore
-		 * @param string $template_path Template file name.
-		 *
-		 * @return string The new Template file path.
-		 */
-	public function redirect_wc_template( $template, $template_name, $template_path ) { // phpcs:ignore WordPress.UnusedFunctionParameter.Found
-
-		if ( 'form-checkout.php' === basename( $template ) ) {
-			$template = trailingslashit( plugin_dir_path( __FILE__ ) ) . 'woocommerce/checkout/form-checkout.php';
-		} elseif ( 'payment.php' === basename( $template ) ) {
-			$template = trailingslashit( plugin_dir_path( __FILE__ ) ) . 'woocommerce/checkout/payment.php';
-		} elseif ( 'review-order.php' === basename( $template ) ) {
-			$template = trailingslashit( plugin_dir_path( __FILE__ ) ) . 'woocommerce/checkout/review-order.php';
-		}
-
-		return $template;
 	}
 
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
