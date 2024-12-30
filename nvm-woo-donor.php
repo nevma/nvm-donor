@@ -103,12 +103,18 @@ class Donor {
 		// Autoload.
 		self::autoload();
 
-		// Scripts & Styles.
-		add_action( 'acf/init', array( $this, 'sync_acf_fields_from_json' ) );
+		// Sync and load ACF Options
+		// Option page
+		add_filter( 'acf/settings/load_json/key=ui_options_page_67703a1d20bc6', array( $this, 'acf_json_load_point' ) );
+		add_filter( 'acf/settings/save_json/key=ui_options_page_67703a1d20bc6', array( $this, 'acf_json_save_point' ) );
+		// Options fields
+		add_filter( 'acf/settings/load_json/key=group_67703a308369d', array( $this, 'acf_json_load_point' ) );
+		add_filter( 'acf/settings/save_json/key=group_67703a308369d', array( $this, 'acf_json_save_point' ) );
 
-		add_action( 'wp_head', array( $this, 'initiate_redirect_template' ) );
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
+
+		add_action( 'wp_header', array( $this, 'initiate_redirect_template' ) );
 
 		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'add_donation_fields_to_product' ) );
 		add_action( 'woocommerce_product_meta_start', array( $this, 'add_content_after_addtocart_button' ), 20 );
@@ -119,12 +125,12 @@ class Donor {
 		add_filter( 'woocommerce_is_sold_individually', array( $this, 'remove_quantity_input_field' ), 10, 2 );
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'adjust_product_price_based_on_choice' ) );
 
-		add_filter( 'woocommerce_checkout_fields', array( $this, 'nvm_customize_checkout_fields' ), 10 );
-
 		// Change add to cart text on single product page
 		add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'add_to_cart_button_text_single' ) );
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'redirect_to_checkout_for_specific_product' ), 50, 6 );
+
+		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donors_ways' ) );
 	}
 
 	/**
@@ -195,35 +201,16 @@ class Donor {
 		}
 	}
 
-	/**
-	 * Load and sync ACF fields from a JSON file.
-	 */
-	public function sync_acf_fields_from_json() {
-		// Path to your JSON file within the plugin directory.
-		$json_file_path = plugin_dir_path( __FILE__ ) . '/acf/donor-acf.json';
+	public function acf_json_load_point( $paths ) {
+		unset( $paths[0] );
+		// Append path to load JSON from your plugin
+		$paths[] = plugin_dir_path( __FILE__ ) . 'acf/';
+		return $paths;
+	}
 
-		// Check if the file exists.
-		if ( ! file_exists( $json_file_path ) ) {
-			return;
-		}
-
-		// Decode the JSON file.
-		$json_content = file_get_contents( $json_file_path );
-		$field_groups = json_decode( $json_content, true );
-
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return;
-		}
-
-		// Ensure ACF is active before syncing fields.
-		if ( ! function_exists( 'acf_add_local_field_group' ) ) {
-			return;
-		}
-
-		// Register each field group with ACF.
-		foreach ( $field_groups as $field_group ) {
-			acf_add_local_field_group( $field_group );
-		}
+	public function acf_json_save_point( $path ) {
+		$path = plugin_dir_path( __FILE__ ) . 'acf/';
+		return $path;
 	}
 
 	public function enqueue_donor_script() {
@@ -235,22 +222,6 @@ class Donor {
 		// self::$plugin_version
 		// );
 		// }
-	}
-
-
-	// Add a custom donation form to the checkout page
-	public function add_donation_type() {
-		?>
-		<!-- Donation Type -->
-		<p>
-			<label for="donation-type"><?php esc_html_e( 'Donation Type', 'nevma' ); ?></label>
-			<select id="donation-type" name="donation_type">
-				<option value="individual"><?php esc_html_e( 'Individual', 'nevma' ); ?></option>
-				<option value="corporate"><?php esc_html_e( 'Corporate', 'nevma' ); ?></option>
-				<option value="memoriam"><?php esc_html_e( 'In Memoriam', 'nevma' ); ?></option>
-			</select>
-		</p>
-		<?php
 	}
 
 	public function remove_quantity_input_field( $return, $product ) {
@@ -449,6 +420,10 @@ class Donor {
 
 	public function initiate_redirect_template() {
 
+		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+			return;
+		}
+
 		$has_donor_product = false;
 		$target_product_id = $this->get_donor_product();
 
@@ -466,6 +441,8 @@ class Donor {
 
 			// remove coupon field on donor checkout
 			remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+			add_filter( 'woocommerce_checkout_fields', array( $this, 'customize_checkout_fields' ), 10 );
+
 		}
 	}
 
@@ -491,14 +468,61 @@ class Donor {
 		return $template;
 	}
 
-	public function nvm_customize_checkout_fields( $fields ) {
+	public function customize_checkout_fields( $fields ) {
 
 			unset( $fields['billing']['billing_company'] );
 			unset( $fields['billing']['billing_address_1'] );
 			unset( $fields['billing']['billing_address_2'] );
 			unset( $fields['billing']['billing_postcode'] );
 			unset( $fields['billing']['billing_state'] );
+
+		return $fields;
 	}
+
+	public function add_donors_ways() {
+
+		$chosen = WC()->session->get( 'donation' );
+		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'donation' ) : $chosen;
+
+		$options = array(
+			'individual' => __( 'ΑΤΟΜΙΚΗ ΔΩΡΕΑ', 'nevma' ),
+			'corporate'  => __( 'ΕΤΑΙΡΙΚΗ ΔΩΡΕΑ', 'nevma' ),
+			'memoriam'   => __( 'ΔΩΡΕΑ ΕΙΣ ΜΝΗΜΗ', 'nevma' ),
+		);
+
+		$args = array(
+			'type'    => 'radio',
+			'class'   => array( 'form-row-wide', 'donation-type' ),
+			'options' => $options,
+			'default' => array_key_first( $options ),
+		);
+
+		echo '<div id="donation-choices">';
+		woocommerce_form_field( 'type_of_donation', $args, $chosen );
+		echo '</div>';
+
+		?>
+
+	<script type="text/javascript">
+		document.addEventListener('DOMContentLoaded', function () {
+			const orderTypeRadios = document.querySelectorAll('input[name="type_of_donation"]');
+
+			function updateDisplay() {
+				const selectedValue = document.querySelector('input[name="type_of_donation"]:checked').value;
+				const displayStyle = selectedValue === 'timologio' ? 'block' : 'none';
+				document.querySelectorAll('.timologio').forEach(el => el.style.display = displayStyle);
+			}
+
+			// Check initially before any clicks
+			updateDisplay();
+
+			// Update display on radio button change
+			orderTypeRadios.forEach(radio => radio.addEventListener('click', updateDisplay));
+		});
+	</script>
+		<?php
+	}
+
 
 	public function render_donation_form() {
 
