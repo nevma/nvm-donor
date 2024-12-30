@@ -111,25 +111,30 @@ class Donor {
 		add_filter( 'acf/settings/load_json/key=group_67703a308369d', array( $this, 'acf_json_load_point' ) );
 		add_filter( 'acf/settings/save_json/key=group_67703a308369d', array( $this, 'acf_json_save_point' ) );
 
+		// Declare HPOS Compability
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
 
 		add_action( 'wp_header', array( $this, 'initiate_redirect_template' ) );
 
-		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'add_donation_fields_to_product' ) );
-		add_action( 'woocommerce_product_meta_start', array( $this, 'add_content_after_addtocart_button' ), 20 );
-
-		add_filter( 'woocommerce_add_cart_item_data', array( $this, 'save_donation_data' ), 10, 2 );
-		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'add_donation_to_order_items' ), 10, 4 );
-
-		add_filter( 'woocommerce_is_sold_individually', array( $this, 'remove_quantity_input_field' ), 10, 2 );
-		add_action( 'woocommerce_before_calculate_totals', array( $this, 'adjust_product_price_based_on_choice' ) );
-
 		// Change add to cart text on single product page
 		add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'add_to_cart_button_text_single' ) );
+		// Add Fields to product
+		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'add_donation_fields_to_product' ) );
+		// Add text field to product
+		add_action( 'woocommerce_product_meta_start', array( $this, 'add_content_after_addtocart_button' ), 20 );
+		// remove quantity
+		add_filter( 'woocommerce_is_sold_individually', array( $this, 'remove_quantity_input_field' ), 10, 2 );
 
+		// Save and calculate costs
+		add_filter( 'woocommerce_add_cart_item_data', array( $this, 'save_donation_data' ), 10, 2 );
+		add_action( 'woocommerce_checkout_create_order_line_item', array( $this, 'add_donation_to_order_items' ), 10, 4 );
+		add_action( 'woocommerce_before_calculate_totals', array( $this, 'adjust_product_price_based_on_choice' ) );
+
+		// Redirect to check out after add to cart
 		add_action( 'woocommerce_add_to_cart', array( $this, 'redirect_to_checkout_for_specific_product' ), 50, 6 );
 
+		// Checkout settings
 		add_action( 'woocommerce_before_checkout_billing_form', array( $this, 'add_donors_ways' ) );
 	}
 
