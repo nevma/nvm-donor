@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class Nvm Acf.
  */
-class Nvm_Acf {
+class Acf {
 
 	public function __construct() {
 
@@ -42,7 +42,8 @@ class Nvm_Acf {
 	public function acf_json_load_point( $paths ) {
 		unset( $paths[0] );
 		// Append path to load JSON from your plugin
-		$paths[] = plugin_dir_path( __FILE__ ) . 'acf/';
+		$paths[] = plugin_dir_path( __DIR__ ) . 'acf/';
+
 		return $paths;
 	}
 
@@ -60,7 +61,12 @@ class Nvm_Acf {
 	 * @since 1.0.0
 	 */
 	public function acf_json_save_point( $path ) {
-		$path = plugin_dir_path( __FILE__ ) . 'acf/';
+		$path = plugin_dir_path( __DIR__ ) . 'acf/';
+		error_log( '$path:' );
+		error_log( print_r( $path, true ) );
+
+		error_log( __METHOD__ );
+
 		return $path;
 	}
 }

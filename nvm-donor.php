@@ -19,7 +19,7 @@
  */
 namespace Nvm;
 
-use Nvm\Donor\Nvm_Acf as N_ACF;
+use Nvm\Donor\Acf as Nvm_Acf;
 
 
 /**
@@ -105,7 +105,7 @@ class Donor {
 
 		// Autoload.
 		self::autoload();
-		self::initiate_more_acf();
+		self::initiate_acf_options();
 
 		// Declare HPOS Compability
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
@@ -152,15 +152,13 @@ class Donor {
 				$path           = explode( '\\', strtolower( str_replace( '_', '-', $relative_class ) ) );
 				$file           = array_pop( $path );
 				$file           = self::$plugin_dir . 'classes/class-' . $file . '.php';
-				error_log( '$file:' );
-				error_log( print_r( $file, true ) );
 
 				if ( file_exists( $file ) ) {
 					require $file;
 				}
 
 				// add the autoload.php file for the prefixed vendor folder.
-				require self::$plugin_dir . 'prefixed/vendor/autoload.php';
+				require self::$plugin_dir . 'prefixed/autoload.php';
 			}
 		);
 	}
@@ -189,8 +187,8 @@ class Donor {
 		}
 	}
 
-	public function initiate_more_acf() {
-		new N_ACF();
+	public function initiate_acf_options() {
+		$init = new Nvm_Acf();
 	}
 
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
