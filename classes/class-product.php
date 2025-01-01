@@ -61,6 +61,39 @@ class Product {
 		return false;
 	}
 
+	public function get_donor_type() {
+		$chosen  = WC()->session->get( 'radio_chosen' );
+		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_donor_type' ) : $chosen;
+		$options = array();
+		$minimum = 1;
+
+		if ( class_exists( 'ACF' ) ) {
+
+			$array_donor = get_field( 'donor_prices', 'options' );
+			if ( ! empty( $array_donor ) ) {
+				foreach ( $array_donor as $donor ) {
+					$donor_amount             = $donor['amount'];
+					$options[ $donor_amount ] = $donor_amount . '€';
+				}
+			}
+		}
+
+			$options = array(
+				'individual' => __( 'ΑΤΟΜΙΚΗ', 'nevma' ),
+				'corporate'  => __( 'ΕΤΑΙΡΙΚΗ', 'nevma' ),
+				'memoriam'   => __( 'ΕΙΣ ΜΝΗΜΗ', 'nevma' ),
+			);
+
+			$args = array(
+				'type'    => 'radio',
+				'class'   => array( 'form-row-wide', 'donation-type' ),
+				'options' => $options,
+				'default' => array_key_first( $options ),
+			);
+
+			woocommerce_form_field( 'type_of_donation', $args, $chosen );
+	}
+
 	public function get_donor_prices() {
 		$chosen  = WC()->session->get( 'radio_chosen' );
 		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
@@ -151,6 +184,7 @@ class Product {
 			return;
 		}
 
+		$this->get_donor_type();
 		$this->get_donor_prices();
 		?>
 		<style>
@@ -158,6 +192,28 @@ class Product {
 			.woocommerce-page form .form-row label {
 				display: inline-block;
 			}
+
+			#type_of_donation_field label{
+				background-color: #fff;
+				color: #eb008b;
+				padding: 6px 20px;
+				border-radius: 20px;
+				box-shadow: 0 0 0 2px #eb008b;
+			}
+			#type_of_donation_field input[type=radio]:checked+label,
+			#type_of_donation_field input[type=radio]:focus+label {
+				background-color: #eb008b;
+				color: #fff;
+
+			}
+
+			#type_of_donation_field input{
+				visibility:hidden;
+
+			}
+			/* #type_of_donation_field input[type="radio"][value="text"]:checked{
+				visibility:hidden;
+			} */
 		</style>
 		<?php
 	}
