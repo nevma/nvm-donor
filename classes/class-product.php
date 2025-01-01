@@ -188,32 +188,68 @@ class Product {
 		$this->get_donor_prices();
 		?>
 		<style>
+
+			form.cart{
+				max-width: 450px;
+			}
+
 			.woocommerce form .form-row label,
 			.woocommerce-page form .form-row label {
 				display: inline-block;
 			}
 
+			#type_of_donation_field > span{
+				display: grid;
+				grid-template-columns: repeat(3, 1fr); /* Δημιουργεί 3 ίσες στήλες */
+				gap: 0px;
+
+			}
 			#type_of_donation_field label{
 				background-color: #fff;
 				color: #eb008b;
 				padding: 6px 20px;
-				border-radius: 20px;
+				border-radius: 2px;
 				box-shadow: 0 0 0 2px #eb008b;
+				text-align: center;
 			}
-			#type_of_donation_field input[type=radio]:checked+label,
-			#type_of_donation_field input[type=radio]:focus+label {
+			#type_of_donation_field input[type=radio]:checked+label {
 				background-color: #eb008b;
 				color: #fff;
+			}
+
+			#type_of_donation_field input,
+			#nvm_radio_choice_field input{
+				visibility:hidden;
+				position: absolute;
+				top: 0px;
 
 			}
 
-			#type_of_donation_field input{
-				visibility:hidden;
-
+			#nvm_radio_choice_field > span{
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				grid-template-rows: auto auto;
+				gap: 0px;
 			}
-			/* #type_of_donation_field input[type="radio"][value="text"]:checked{
-				visibility:hidden;
-			} */
+
+			#nvm_radio_choice_field label:last-child {
+				grid-column: 1 / -1; /* εκτείνεται σε όλες τις στήλες */
+			}
+
+			#nvm_radio_choice_field label{
+				background-color: #fff;
+				color: #023f88;
+				padding: 6px 20px;
+				border-radius: 2px;
+				box-shadow: 0 0 0 2px #023f88;
+				text-align: center;
+			}
+
+			#nvm_radio_choice_field input[type=radio]:checked+label {
+				background-color: #023f88;
+				color: #fff;
+			}
+
 		</style>
 		<?php
 	}
