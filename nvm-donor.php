@@ -110,7 +110,7 @@ class Donor {
 		self::autoload();
 		self::initiate_acf_options();
 		self::initiate_product_donor();
-		self::initiate_checkout_donor();
+		// self::initiate_checkout_donor();
 
 		// Declare HPOS Compability
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
