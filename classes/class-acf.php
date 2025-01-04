@@ -62,11 +62,6 @@ class Acf {
 	 */
 	public function acf_json_save_point( $path ) {
 		$path = plugin_dir_path( __DIR__ ) . 'acf/';
-		error_log( '$path:' );
-		error_log( print_r( $path, true ) );
-
-		error_log( __METHOD__ );
-
 		return $path;
 	}
 }

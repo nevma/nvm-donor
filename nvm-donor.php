@@ -21,7 +21,6 @@ namespace Nvm;
 
 use Nvm\Donor\Acf as Nvm_Acf;
 use Nvm\Donor\Product as Nvm_Product;
-use Nvm\Donor\Checkout as Nvm_Checkout;
 
 
 
@@ -110,7 +109,6 @@ class Donor {
 		self::autoload();
 		self::initiate_acf_options();
 		self::initiate_product_donor();
-		// self::initiate_checkout_donor();
 
 		// Declare HPOS Compability
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
@@ -176,10 +174,6 @@ class Donor {
 
 	public function initiate_product_donor() {
 		$init = new Nvm_Product();
-	}
-
-	public function initiate_checkout_donor() {
-		$init = new Nvm_Checkout();
 	}
 
 

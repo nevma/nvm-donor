@@ -183,9 +183,14 @@ class Product {
 		if ( $product->get_id() !== $target_product_id ) {
 			return;
 		}
-
+		echo '<div id="first-step">';
 		$this->get_donor_type();
 		$this->get_donor_prices();
+		echo '<button>Next Step</button>';
+		echo '</div>';
+		echo '<div id="second-step">';
+		echo '</div>';
+
 		?>
 		<style>
 
