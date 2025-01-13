@@ -34,6 +34,7 @@ class Product {
 
 		// Redirect to check out after add to cart
 		add_action( 'woocommerce_add_to_cart', array( $this, 'redirect_to_checkout_for_specific_product' ), 50, 6 );
+		add_action( 'save_post', array( $this, 'nvm_set_product_virtual_on_save' ), 10, 2 );
 	}
 
 
@@ -41,7 +42,7 @@ class Product {
 
 		if ( is_product() ) {
 
-			$target_product_id = $this->get_donor_product();
+			$target_product_id = $this->product_is_donor( $product );
 
 			if ( $product->get_id() === $target_product_id ) {
 				return true;
@@ -51,11 +52,14 @@ class Product {
 	}
 
 
-	public function get_donor_product() {
+	public function product_is_donor( $product ) {
 		if ( class_exists( 'ACF' ) ) {
-			$donor_product_id = get_field( 'product', 'options' );
+			$donor_product_id = get_field( 'activate' );
 
-			return $donor_product_id;
+			if ( $donor_product_id ) {
+				$donor_product_id = $product->get_id();
+				return $donor_product_id;
+			}
 		}
 
 		return false;
@@ -69,7 +73,7 @@ class Product {
 
 		if ( class_exists( 'ACF' ) ) {
 
-			$array_donor = get_field( 'donor_prices', 'options' );
+			$array_donor = get_field( 'donor_prices' );
 			if ( ! empty( $array_donor ) ) {
 				foreach ( $array_donor as $donor ) {
 					$donor_amount             = $donor['amount'];
@@ -101,9 +105,9 @@ class Product {
 		$minimum = 1;
 
 		if ( class_exists( 'ACF' ) ) {
-			$minimum = get_field( 'minimun_amount', 'options' );
+			$minimum = get_field( 'minimun_amount' );
 
-			$array_donor = get_field( 'donor_prices', 'options' );
+			$array_donor = get_field( 'donor_prices' );
 			if ( ! empty( $array_donor ) ) {
 				foreach ( $array_donor as $donor ) {
 					$donor_amount             = $donor['amount'];
@@ -155,14 +159,28 @@ class Product {
 		wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 	}
 
-	public function add_to_cart_button_text_single() {
+	public function add_to_cart_button_text_single( $text ) {
+
+		global $product;
+
+		$product_is_donor = $this->product_is_donor( $product );
+
+		if ( empty( $product_is_donor ) ) {
+			return $text;
+		}
 		return __( 'Donor Amount', 'nevma' );
 	}
 
 	public function add_content_after_addtocart_button() {
-
+		global $product;
 		if ( class_exists( 'ACF' ) ) {
-			$donor_text = get_field( 'text_after', 'options' );
+			$product_is_donor = $this->product_is_donor( $product );
+
+			if ( empty( $product_is_donor ) ) {
+				return;
+			}
+
+			$donor_text = get_field( 'text_after' );
 
 			echo '<span class="safe">';
 			echo $donor_text;
@@ -178,7 +196,7 @@ class Product {
 		global $product;
 
 		// Target specific product for donations.
-		$target_product_id = $this->get_donor_product();
+		$target_product_id = $this->product_is_donor( $product );
 
 		if ( $product->get_id() !== $target_product_id ) {
 			return;
@@ -330,15 +348,41 @@ class Product {
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
 
 		// Target specific product for donations.
-		$target_product_id = $this->get_donor_product();
+		$product = wc_get_product( $product_id );
 
-		if ( $product_id === $target_product_id ) {
+		if ( ! empty( $this->product_is_donor( $product ) ) ) {
 			// Get the checkout URL
 			$checkout_url = wc_get_checkout_url();
 
 			// Redirect to the checkout page
 			wp_safe_redirect( $checkout_url );
 			exit;
+		}
+	}
+
+	/**
+	 * Automatically set a WooCommerce product as virtual when saved.
+	 *
+	 * @param int     $post_id The ID of the product being saved.
+	 * @param WP_Post $post The product post object.
+	 */
+	function nvm_set_product_virtual_on_save( $post_id, $post ) {
+		// Ensure this is a product and not an autosave or revision.
+		if ( 'product' !== $post->post_type || wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+			return;
+		}
+
+		// Load the product object.
+		$product = wc_get_product( $post_id );
+
+		if ( ! empty( $this->product_is_donor( $product ) ) ) {
+
+			// Check if it's not already virtual.
+			if ( $product && ! $product->is_virtual() ) {
+				// Set the product as virtual.
+				$product->set_virtual( true );
+				$product->save();
+			}
 		}
 	}
 }

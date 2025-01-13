@@ -22,8 +22,6 @@ namespace Nvm;
 use Nvm\Donor\Acf as Nvm_Acf;
 use Nvm\Donor\Product as Nvm_Product;
 
-
-
 /**
  * Check that the file is not accessed directly.
  */

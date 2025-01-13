@@ -3,11 +3,11 @@
     "title": "Donor Setting",
     "fields": [
         {
-            "key": "field_67710dd0c93fc",
-            "label": "Product",
-            "name": "product",
+            "key": "field_6784f4a4b1b26",
+            "label": "Είναι ενεργό προιόν Δωρεά.",
+            "name": "activate",
             "aria-label": "",
-            "type": "post_object",
+            "type": "true_false",
             "instructions": "",
             "required": 0,
             "conditional_logic": 0,
@@ -16,20 +16,38 @@
                 "class": "",
                 "id": ""
             },
-            "post_type": [
-                "product"
-            ],
-            "post_status": [
-                "publish"
-            ],
-            "taxonomy": "",
-            "return_format": "id",
-            "multiple": 0,
-            "allow_null": 0,
+            "message": "",
+            "default_value": 0,
             "allow_in_bindings": 0,
-            "bidirectional": 0,
-            "ui": 1,
-            "bidirectional_target": []
+            "ui_on_text": "Ενεργό",
+            "ui_off_text": "Ανενεργό",
+            "ui": 1
+        },
+        {
+            "key": "field_6784fc92f65a2",
+            "label": "Βασικές πληροφορίες",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6784f4a4b1b26",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
         },
         {
             "key": "field_67703a3022ab9",
@@ -39,7 +57,15 @@
             "type": "repeater",
             "instructions": "",
             "required": 0,
-            "conditional_logic": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6784f4a4b1b26",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
             "wrapper": {
                 "width": "",
                 "class": "",
@@ -59,7 +85,7 @@
                     "name": "amount",
                     "aria-label": "",
                     "type": "number",
-                    "instructions": "",
+                    "instructions": "Θα ήταν καλό να εμφανίζονται μέχρι 4 δυνατότητες",
                     "required": 0,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -80,6 +106,87 @@
             ]
         },
         {
+            "key": "field_6784fcabf65a3",
+            "label": "Κείμενα",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6784f4a4b1b26",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_6771a2eb96de2",
+            "label": "Κείμενο μετά την Δωρεά",
+            "name": "text_after",
+            "aria-label": "",
+            "type": "wysiwyg",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6784f4a4b1b26",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "allow_in_bindings": 1,
+            "tabs": "all",
+            "toolbar": "full",
+            "media_upload": 1,
+            "delay": 0
+        },
+        {
+            "key": "field_6784fce475b35",
+            "label": "Ελάχιστη ποσότητα",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6784f4a4b1b26",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
             "key": "field_67703ab4cc972",
             "label": "Minimun Amount",
             "name": "minimun_amount",
@@ -87,7 +194,15 @@
             "type": "number",
             "instructions": "",
             "required": 0,
-            "conditional_logic": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6784f4a4b1b26",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
             "wrapper": {
                 "width": "",
                 "class": "",
@@ -101,35 +216,14 @@
             "step": "",
             "prepend": "",
             "append": ""
-        },
-        {
-            "key": "field_6771a2eb96de2",
-            "label": "Κείμενο μετά την Δωρεά",
-            "name": "text_after",
-            "aria-label": "",
-            "type": "wysiwyg",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "allow_in_bindings": 1,
-            "tabs": "all",
-            "toolbar": "full",
-            "media_upload": 1,
-            "delay": 0
         }
     ],
     "location": [
         [
             {
-                "param": "options_page",
+                "param": "post_type",
                 "operator": "==",
-                "value": "donor-setting"
+                "value": "product"
             }
         ]
     ],
@@ -142,5 +236,5 @@
     "active": true,
     "description": "",
     "show_in_rest": 0,
-    "modified": 1735561160
+    "modified": 1736768844
 }
