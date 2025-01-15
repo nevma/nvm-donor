@@ -404,9 +404,9 @@ class Product {
 		global $product;
 
 		// Target specific product for donations.
-		$target_product_id = $this->product_is_donor( $product );
+		$donor = $this->product_is_donor( $product );
 
-		if ( $product->get_id() !== $target_product_id ) {
+		if ( empty( $donor ) ) {
 			return;
 		}
 
