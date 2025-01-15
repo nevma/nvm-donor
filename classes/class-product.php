@@ -181,7 +181,7 @@ class Product {
 				'type'     => 'text',
 				'label'    => __( 'Όνομα', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-first', 'company' ),
+				'class'    => array( 'form-row-first', 'epistoli' ),
 			)
 		);
 
@@ -191,7 +191,7 @@ class Product {
 				'type'     => 'text',
 				'label'    => __( 'Επίθετο', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-last', 'company' ),
+				'class'    => array( 'form-row-last', 'epistoli' ),
 			)
 		);
 
@@ -201,7 +201,7 @@ class Product {
 				'type'     => 'text',
 				'label'    => __( 'Τίτλος', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-wide', 'company' ),
+				'class'    => array( 'form-row-wide', 'epistoli' ),
 			)
 		);
 
@@ -211,7 +211,7 @@ class Product {
 				'type'     => 'email',
 				'label'    => __( 'email', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-wide', 'company' ),
+				'class'    => array( 'form-row-wide', 'epistoli' ),
 			)
 		);
 
@@ -337,32 +337,32 @@ class Product {
 		);
 
 		woocommerce_form_field(
-			'nvm_relative',
+			'nvm_company',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'ΕΠΩΝΥΜΙΑ', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-wide', 'company', 'memoriam' ),
+				'class'    => array( 'form-row-wide', 'timologio' ),
 			)
 		);
 
 		woocommerce_form_field(
-			'nvm_town',
+			'nvm_afm',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'ΑΦΜ', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-first', 'common' ),
+				'class'    => array( 'form-row-first', 'timologio' ),
 			)
 		);
 
 		woocommerce_form_field(
-			'nvm_town',
+			'nvm_doy',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'ΔΟΥ', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-last', 'common' ),
+				'class'    => array( 'form-row-last', 'timologio' ),
 			)
 		);
 
@@ -422,13 +422,169 @@ class Product {
 		echo '</div>';
 
 		echo '<div id="second-step" class="step">';
-		echo '<button type="button steps" onclick="nvm_prevStep()"><-</button>';
+		echo '<button type="button" onclick="nvm_prevStep()"><-</button>';
 		$this->get_donor_details();
-
-		echo '<button type="button" onclick="nvm_nextStep()">Next</button>';
 		echo '</div>';
 		echo wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 		?>
+		<script>
+			let nvm_currentStep = 1;
+
+			// Initialize all event listeners on page load
+			document.addEventListener('DOMContentLoaded', function () {
+				nvm_showStep(nvm_currentStep);         // Initialize the first step
+				nvm_toggleFields();                    // Initialize visibility based on the selected donation type
+				nvm_setupDonationAmountHandler();      // Initialize donation amount input behavior
+				nvm_setupDonationTypeHandler();       // Initialize donation type toggle behavior
+
+				// Add event listener to the "Έκδοση Τιμολογίου" checkbox if it exists
+				const invoiceCheckbox = document.getElementById('nvm_timologio');
+				if (invoiceCheckbox) {
+					invoiceCheckbox.addEventListener('change', nvm_toggleInvoiceFields);
+					nvm_toggleInvoiceFields(); // Initialize invoice fields based on the checkbox state
+				}
+			});
+
+			/**
+			 * Show the specified step
+			 * @param {number} step
+			 */
+			function nvm_showStep(step) {
+				const steps = document.querySelectorAll('.step');
+				steps.forEach((stepDiv, index) => {
+					stepDiv.classList.toggle('active', index === step - 1);
+				});
+			}
+
+			/**
+			 * Go to the next step
+			 */
+			function nvm_nextStep() {
+				if (nvm_currentStep === 1) {
+					if (!nvm_validateDonationAmount()) {
+						return;
+					}
+				}
+
+				if (nvm_currentStep < 2) {
+					nvm_currentStep++;
+					nvm_showStep(nvm_currentStep);
+				}
+			}
+
+			/**
+			 * Go to the previous step
+			 */
+			function nvm_prevStep() {
+				if (nvm_currentStep > 1) {
+					nvm_currentStep--;
+					nvm_showStep(nvm_currentStep);
+				}
+			}
+
+			/**
+			 * Validate the donation amount before proceeding
+			 * @returns {boolean}
+			 */
+			function nvm_validateDonationAmount() {
+				const donationChoice = document.querySelector('input[name="nvm_radio_choice"]:checked')?.value;
+				const customAmountInput = document.getElementById('donation_amount');
+				const customAmount = customAmountInput ? customAmountInput.value.trim() : '';
+
+				if (donationChoice === 'custom') {
+					if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 5) {
+						alert('Παρακαλώ προσθέστε ένα ποσό πληρωμής (τουλάχιστον 5€).');
+						return false;
+					}
+				}
+				return true;
+			}
+
+			/**
+			 * Toggle visibility of form fields based on the selected donation type
+			 */
+			function nvm_toggleFields() {
+				const donationType = document.querySelector('input[name="type_of_donation"]:checked').value;
+
+				// Group selectors for fields
+				const companyFields = document.querySelectorAll('.company');
+				const memoriamFields = document.querySelectorAll('.memoriam');
+				const commonFields = document.querySelectorAll('.common');
+
+				// Hide all optional fields first
+				companyFields.forEach(field => field.style.display = 'none');
+				memoriamFields.forEach(field => field.style.display = 'none');
+				commonFields.forEach(field => field.style.display = 'block'); // Always show common fields
+
+				// Show relevant fields based on donation type
+				if (donationType === 'corporate') {
+					companyFields.forEach(field => field.style.display = 'block');
+				} else if (donationType === 'memoriam') {
+					memoriamFields.forEach(field => field.style.display = 'block');
+				}
+			}
+
+			/**
+			 * Setup event listeners for donation type radio buttons
+			 */
+			function nvm_setupDonationTypeHandler() {
+				document.querySelectorAll('input[name="type_of_donation"]').forEach(function (radio) {
+					radio.addEventListener('change', nvm_toggleFields);
+				});
+			}
+
+			/**
+			 * Setup behavior for donation amount radio buttons and custom input
+			 */
+			function nvm_setupDonationAmountHandler() {
+				const customAmountRadio = document.getElementById('nvm_radio_choice_custom');
+				const donationAmountInput = document.getElementById('donation_amount');
+				const donationRadios = document.querySelectorAll('input[name="nvm_radio_choice"]');
+
+				// Set the default input value based on the initially checked radio button
+				const selectedRadio = document.querySelector('input[name="nvm_radio_choice"]:checked');
+				if (selectedRadio && selectedRadio.value !== 'custom') {
+					donationAmountInput.value = selectedRadio.value;
+					donationAmountInput.setAttribute('readonly', 'readonly');
+				}
+
+				// Update input value based on the selected donation option
+				donationRadios.forEach(radio => {
+					radio.addEventListener('change', function () {
+						if (customAmountRadio.checked) {
+							donationAmountInput.value = '';
+							donationAmountInput.removeAttribute('readonly');
+							donationAmountInput.focus();
+						} else {
+							donationAmountInput.value = this.value;
+							donationAmountInput.setAttribute('readonly', 'readonly');
+						}
+					});
+				});
+			}
+
+			/**
+			 * Show or hide invoice fields based on the checkbox state
+			 */
+			function nvm_toggleInvoiceFields() {
+				const invoiceCheckbox = document.getElementById('nvm_timologio');
+				if (!invoiceCheckbox) return; // Exit if checkbox is not found
+
+				// Fields to toggle
+				const relativeField = document.getElementById('nvm_company_field');
+				const afmField = document.getElementById('nvm_afm_field');
+				const douField = document.getElementById('nvm_doy_field');
+
+				// Ensure fields exist before trying to change their display
+				if (relativeField && afmField && douField) {
+					const displayStyle = invoiceCheckbox.checked ? 'block' : 'none';
+					relativeField.style.display = displayStyle;
+					afmField.style.display = displayStyle;
+					douField.style.display = displayStyle;
+				}
+			}
+		</script>
+
 		<style>
 
 			#donation_amount{
@@ -535,79 +691,7 @@ class Product {
 				display:none;
 			}
 
-
 		</style>
-
-		<script>
-			let nvm_currentStep = 1;
-
-			document.addEventListener('DOMContentLoaded', function () {
-				const customAmountRadio = document.getElementById('nvm_radio_choice_custom');
-				const donationAmountInput = document.getElementById('donation_amount');
-				const donationRadios = document.querySelectorAll('input[name="nvm_radio_choice"]');
-
-				// Set default input value based on the initially checked radio
-				const selectedRadio = document.querySelector('input[name="nvm_radio_choice"]:checked');
-				if (selectedRadio && selectedRadio.value !== 'custom') {
-					donationAmountInput.value = selectedRadio.value;
-					donationAmountInput.setAttribute('readonly', 'readonly');
-				}
-
-				// Update the input value according to the selected option
-				donationRadios.forEach(radio => {
-					radio.addEventListener('change', function () {
-						if (customAmountRadio.checked) {
-							donationAmountInput.value = '';
-							donationAmountInput.removeAttribute('readonly');
-							donationAmountInput.focus();
-						} else {
-							donationAmountInput.value = this.value;
-							donationAmountInput.setAttribute('readonly', 'readonly');
-						}
-					});
-				});
-			});
-
-			function nvm_showStep(step) {
-				const steps = document.querySelectorAll('.step');
-				steps.forEach((stepDiv, index) => {
-					stepDiv.classList.toggle('active', index === step - 1);
-				});
-			}
-
-			function nvm_nextStep() {
-				if (nvm_currentStep === 1) {
-					const typeOfDonation = document.querySelector('input[name="type_of_donation"]:checked')?.value;
-					const donationChoice = document.querySelector('input[name="nvm_radio_choice"]:checked')?.value;
-					const customAmountInput = document.getElementById('donation_amount');
-					const customAmount = customAmountInput ? customAmountInput.value.trim() : '';
-
-					if (donationChoice === 'custom') {
-						if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 5) {
-							alert('Παρακαλώ προσθέστε ένα ποσό πληρωμής.');
-							return;
-						}
-					}
-				}
-
-				if (nvm_currentStep < 3) {
-					nvm_currentStep++;
-					nvm_showStep(nvm_currentStep);
-				}
-			}
-
-			function nvm_prevStep() {
-				if (nvm_currentStep > 1) {
-					nvm_currentStep--;
-					nvm_showStep(nvm_currentStep);
-				}
-			}
-
-			// Initialize the first step
-			document.addEventListener("DOMContentLoaded", function () {
-				nvm_showStep(nvm_currentStep);
-			});
-		</script>
 		<?php
 	}
 
