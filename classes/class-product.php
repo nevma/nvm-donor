@@ -890,6 +890,10 @@ class Product {
 
 			$item->add_meta_data( __( 'nvm_radio_choice', 'nevma' ), $values['nvm_radio_choice'] );
 		}
+		if ( isset( $values['type_of_donation'] ) ) {
+
+			$item->add_meta_data( __( 'Τύπος Δωρεάς', 'nevma' ), $values['type_of_donation'] );
+		}
 	}
 
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
