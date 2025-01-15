@@ -770,16 +770,20 @@ class Product {
 		<?php
 	}
 
-		/**
-		 * Save donation data to cart item.
-		 *
-		 * @param array $cart_item_data Cart item data.
-		 * @param int   $product_id Product ID.
-		 */
+	/**
+	 * Save donation data to cart item.
+	 *
+	 * @param array $cart_item_data Cart item data.
+	 * @param int   $product_id Product ID.
+	 */
 	public function save_donation_data( $cart_item_data, $product_id ) {
 
 		if ( ! isset( $_POST['donation_form_nonce_field'] ) || ! wp_verify_nonce( $_POST['donation_form_nonce_field'], 'donation_form_nonce' ) ) {
 			wp_die();
+		}
+
+		if ( isset( $_POST['type_of_donation'] ) ) {
+			$cart_item_data['type_of_donation'] = $_POST['type_of_donation'];
 		}
 
 		if ( isset( $_POST['nvm_radio_choice'] ) ) {
