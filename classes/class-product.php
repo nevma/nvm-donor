@@ -155,8 +155,6 @@ class Product {
 		);
 		// echo '<span>' . __( 'Minimun Amount:', 'nevma' ) . ' ' . $minimum . '€</span>';
 		echo '</div>';
-
-		wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 	}
 
 	public function get_donor_details() {
@@ -425,6 +423,7 @@ class Product {
 
 		echo '<button type="button" onclick="nvm_nextStep()">Next</button>';
 		echo '</div>';
+		echo wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 		?>
 		<style>
 
