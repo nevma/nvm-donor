@@ -99,8 +99,8 @@ class Product {
 	}
 
 	public function get_donor_prices() {
-		$chosen  = WC()->session->get( 'radio_chosen' );
-		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
+		// $chosen = WC()->session->get( 'radio_chosen' );
+		// $chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
 		$options = array();
 		$minimum = 1;
 
@@ -125,8 +125,9 @@ class Product {
 			);
 		}
 
-		$options['custom'] = esc_html__( 'Custom Amount', 'nevma' );
-		$chosen            = empty( $chosen ) ? array_key_first( $options ) : $chosen;
+		$options['custom'] = esc_html__( 'Άλλο Ποσό', 'nevma' );
+		// $chosen            = empty( $chosen ) ? array_key_first( $options ) : $chosen;
+		$chosen = 'custom';
 
 		$args = array(
 			'type'    => 'radio',
@@ -144,16 +145,226 @@ class Product {
 			'donation_amount',
 			array(
 				'type'              => 'number',
-				'label'             => __( 'Donation Amount (€)', 'nevma' ),
+				'label'             => __( 'Ποσό Δωρεάς', 'nevma' ),
 				'required'          => false,
 				'class'             => array( 'form-row-wide' ),
-				'placeholder'       => __( 'Enter an amount', 'nevma' ),
+				'placeholder'       => __( 'Προσθέστε το Ποσό / Eλάχιστό', 'nevma' ) . ' ' . $minimum . ' (€)',
 				'custom_attributes' => array(
 					'min' => $minimum,
 				),
 			)
 		);
-		echo '<span>' . __( 'Minimun Amount:', 'nevma' ) . ' ' . $minimum . '€</span>';
+		// echo '<span>' . __( 'Minimun Amount:', 'nevma' ) . ' ' . $minimum . '€</span>';
+		echo '</div>';
+
+		wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
+	}
+
+	public function get_donor_details() {
+
+		echo '<div class="donation-fields">';
+
+		woocommerce_form_field(
+			'nvm_epistoli',
+			array(
+				'type'     => 'checkbox',
+				'label'    => __( 'Αν επιθυμείτε ευχαριστήρια επιστολή, παρακαλούμε συμπληρώστε τα στοιχεία του παραλήπτη', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'company' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_name_company',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Όνομα', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-first', 'company' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_surname_company',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Επίθετο', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-last', 'company' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_space_company',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Τίτλος', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'company' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_email_company',
+			array(
+				'type'     => 'email',
+				'label'    => __( 'email', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'company' ),
+			)
+		);
+
+		echo __( 'Στοιχεία Δωρητή', 'nevma' );
+		woocommerce_form_field(
+			'nvm_email',
+			array(
+				'type'     => 'email',
+				'label'    => __( 'email', 'nevma' ),
+				'required' => true,
+				'class'    => array( 'form-row-wide', 'common' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_name',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Όνομα', 'nevma' ),
+				'required' => true,
+				'class'    => array( 'form-row-first', 'common' ),
+			)
+		);
+		woocommerce_form_field(
+			'nvm_surname',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Επίθετο', 'nevma' ),
+				'required' => true,
+				'class'    => array( 'form-row-last', 'common' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_address',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Διεύθυνση', 'nevma' ),
+				'required' => true,
+				'class'    => array( 'form-row-wide', 'common' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_town',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Πόλη', 'nevma' ),
+				'required' => true,
+				'class'    => array( 'form-row-first', 'common' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_town',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Τ.Κ.', 'nevma' ),
+				'required' => true,
+				'class'    => array( 'form-row-last', 'common' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_telephone',
+			array(
+				'type'     => 'tel',
+				'label'    => __( 'Τηλέφωνο', 'nevma' ),
+				'required' => true,
+				'class'    => array( 'form-row-wide', 'common' ),
+
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_dead',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Ονοματεπώνυμο θανόντος/ ούσης', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_dead',
+			array(
+				'type'     => 'checkbox',
+				'label'    => __( 'Eπιθυμείτε αναγγελία', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_relative',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Όνομα συγγενούς θανόντος/ούσης', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_relative',
+			array(
+				'type'     => 'textarea',
+				'label'    => __( 'Μήνυμα', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_timologio',
+			array(
+				'type'     => 'checkbox',
+				'label'    => __( 'Έκδοση Τιμολογίου', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'company', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_relative',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'ΕΠΩΝΥΜΙΑ', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'company', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_town',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'ΑΦΜ', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-first', 'common' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_town',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'ΔΟΥ', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-last', 'common' ),
+			)
+		);
+
 		echo '</div>';
 
 		wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
@@ -201,19 +412,61 @@ class Product {
 		if ( $product->get_id() !== $target_product_id ) {
 			return;
 		}
-		echo '<div id="first-step">';
+
+		echo '<div id="first-step" class="step active">';
+
 		$this->get_donor_type();
 		$this->get_donor_prices();
-		echo '<button>Next Step</button>';
-		echo '</div>';
-		echo '<div id="second-step">';
+		echo '<button type="button" class="button steps" onclick="nvm_nextStep()">Επόμενο / Next</button>';
 		echo '</div>';
 
+		echo '<div id="second-step" class="step">';
+		$this->get_donor_details();
+
+		echo '<button type="button steps" onclick="nvm_prevStep()">Previous</button>
+				<button type="button" onclick="nvm_nextStep()">Next</button>';
+		echo '</div>';
 		?>
 		<style>
+			.button.steps{
+				border-radius: 0rem;
+				border-color: var(--wp--preset--color--contrast);
+				border-width: 2px;
+
+				font-family: inherit;
+				font-size: var(--wp--preset--font-size--small);
+				font-style: normal;
+				font-weight: 500;
+				line-height: inherit;
+				padding-top: 0.9rem;
+				padding-right: 1rem;
+				padding-bottom: 0.9rem;
+				padding-left: 1rem;
+				text-decoration: none;
+				width: 100%;
+			}
+
+			.button.steps:hover{
+				background-color: var(--wp--preset--color--contrast);
+				color: var(--wp--preset--color--base);
+			}
+			.step {
+				min-height: 400px;
+			}
 
 			form.cart{
 				max-width: 450px;
+			}
+			.step{
+				display:none;
+			}
+
+			.step.active{
+				display:block;
+			}
+			#donation_amount_field label{
+				text-align:center;
+				display: block;
 			}
 
 			.woocommerce form .form-row label,
@@ -272,8 +525,83 @@ class Product {
 				background-color: #023f88;
 				color: #fff;
 			}
+			.optional{
+				display:none;
+			}
+
 
 		</style>
+
+		<script>
+			let nvm_currentStep = 1;
+
+			document.addEventListener('DOMContentLoaded', function () {
+				const customAmountRadio = document.getElementById('nvm_radio_choice_custom');
+				const donationAmountInput = document.getElementById('donation_amount');
+				const donationRadios = document.querySelectorAll('input[name="nvm_radio_choice"]');
+
+				// Set default input value based on the initially checked radio
+				const selectedRadio = document.querySelector('input[name="nvm_radio_choice"]:checked');
+				if (selectedRadio && selectedRadio.value !== 'custom') {
+					donationAmountInput.value = selectedRadio.value;
+					donationAmountInput.setAttribute('readonly', 'readonly');
+				}
+
+				// Update the input value according to the selected option
+				donationRadios.forEach(radio => {
+					radio.addEventListener('change', function () {
+						if (customAmountRadio.checked) {
+							donationAmountInput.value = '';
+							donationAmountInput.removeAttribute('readonly');
+							donationAmountInput.focus();
+						} else {
+							donationAmountInput.value = this.value;
+							donationAmountInput.setAttribute('readonly', 'readonly');
+						}
+					});
+				});
+			});
+
+			function nvm_showStep(step) {
+				const steps = document.querySelectorAll('.step');
+				steps.forEach((stepDiv, index) => {
+					stepDiv.classList.toggle('active', index === step - 1);
+				});
+			}
+
+			function nvm_nextStep() {
+				if (nvm_currentStep === 1) {
+					const typeOfDonation = document.querySelector('input[name="type_of_donation"]:checked')?.value;
+					const donationChoice = document.querySelector('input[name="nvm_radio_choice"]:checked')?.value;
+					const customAmountInput = document.getElementById('donation_amount');
+					const customAmount = customAmountInput ? customAmountInput.value.trim() : '';
+
+					if (donationChoice === 'custom') {
+						if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 5) {
+							alert('Please enter a valid custom amount (minimum 5€).');
+							return;
+						}
+					}
+				}
+
+				if (nvm_currentStep < 3) {
+					nvm_currentStep++;
+					nvm_showStep(nvm_currentStep);
+				}
+			}
+
+			function nvm_prevStep() {
+				if (nvm_currentStep > 1) {
+					nvm_currentStep--;
+					nvm_showStep(nvm_currentStep);
+				}
+			}
+
+			// Initialize the first step
+			document.addEventListener("DOMContentLoaded", function () {
+				nvm_showStep(nvm_currentStep);
+			});
+		</script>
 		<?php
 	}
 
