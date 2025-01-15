@@ -66,10 +66,12 @@ class Product {
 	}
 
 	public function get_donor_type() {
-		$chosen  = WC()->session->get( 'radio_chosen' );
-		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_donor_type' ) : $chosen;
+
+		$chosen = WC()->session->get( 'type_of_donation' );
+		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'type_of_donation' ) : $chosen;
+		$chosen = empty( $chosen ) ? 'individual' : $chosen;
+
 		$options = array();
-		$minimum = 1;
 
 		if ( class_exists( 'ACF' ) ) {
 
@@ -92,7 +94,7 @@ class Product {
 				'type'    => 'radio',
 				'class'   => array( 'form-row-wide', 'donation-type' ),
 				'options' => $options,
-				'default' => array_key_first( $options ),
+				'default' => $chosen,
 			);
 
 			woocommerce_form_field( 'type_of_donation', $args, $chosen );
@@ -144,7 +146,7 @@ class Product {
 			'donation_amount',
 			array(
 				'type'              => 'number',
-				'label'             => __( 'Ποσό Δωρεάς σε ευρώ', 'nevma' ),
+				// 'label'             => __( 'Ποσό Δωρεάς σε ευρώ', 'nevma' ),
 				'required'          => false,
 				'class'             => array( 'form-row-wide' ),
 				'placeholder'       => __( 'Προσθέστε το Ποσό / Eλάχιστό', 'nevma' ) . ' ' . $minimum . ' (€)',
