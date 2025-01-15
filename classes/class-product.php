@@ -26,6 +26,7 @@ class Product {
 		add_action( 'woocommerce_product_meta_start', array( $this, 'add_content_after_addtocart_button' ), 20 );
 		// remove quantity
 		add_filter( 'woocommerce_is_sold_individually', array( $this, 'remove_quantity_input_field' ), 10, 2 );
+		add_filter( 'woocommerce_checkout_fields', array( $this, 'remove_checkout_fields' ) );
 
 		// Save and calculate costs
 		add_filter( 'woocommerce_add_cart_item_data', array( $this, 'save_donation_data' ), 10, 2 );
@@ -34,7 +35,12 @@ class Product {
 
 		// Redirect to check out after add to cart
 		add_action( 'woocommerce_add_to_cart', array( $this, 'redirect_to_checkout_for_specific_product' ), 50, 6 );
-		add_action( 'save_post', array( $this, 'nvm_set_product_virtual_on_save' ), 10, 2 );
+		add_action( 'save_post', array( $this, 'set_product_virtual_on_save' ), 10, 2 );
+
+		// Add body class filter
+		add_filter( 'body_class', array( $this, 'add_donor_class_to_checkout' ) );
+
+		add_action( 'woocommerce_checkout_create_order', array( $this, 'update_billing_details_from_donation' ), 10, 2 );
 	}
 
 
@@ -304,7 +310,7 @@ class Product {
 			'nvm_dead_name',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Ονοματεπώνυμο θανόντος/ ούσης', 'nevma' ),
+				'label'    => __( 'Ονοματεπώνυμο θανό��������τος/ ούσης', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
@@ -806,7 +812,7 @@ class Product {
 		}
 
 		if ( isset( $_POST['nvm_address'] ) ) {
-			$cart_item_data['user_addres'] = $_POST['nvm_address'];
+			$cart_item_data['user_address'] = $_POST['nvm_address'];
 		}
 
 		if ( isset( $_POST['nvm_town'] ) ) {
@@ -876,25 +882,81 @@ class Product {
 		}
 	}
 
-		/**
-		 * Add donation data to order items.
-		 *
-		 * @param \WC_Order_Item $item Order item.
-		 * @param string         $cart_item_key Cart item key.
-		 * @param array          $values Cart item data.
-		 * @param \WC_Order      $order Order object.
-		 */
+	/**
+	 * Add all custom donation data to order items.
+	 *
+	 * @param \WC_Order_Item $item Order item.
+	 * @param string         $cart_item_key Cart item key.
+	 * @param array          $values Cart item data.
+	 * @param \WC_Order      $order Order object.
+	 */
 	public function add_donation_to_order_items( $item, $cart_item_key, $values, $order ) {
+		// Define a list of keys you want to save to the order item.
+		$custom_keys = array(
+			'type_of_donation'  => __( 'Τύπος Δωρεάς', 'nevma' ),
+			'epistoli_name'     => __( 'Όνομα Επιστολής', 'nevma' ),
+			'epistoli_surname'  => __( 'Επώνυμο Επιστολής', 'nevma' ),
+			'epistoli_position' => __( 'Θέση Επιστολής', 'nevma' ),
+			'epistoli_email'    => __( 'Email Επιστολής', 'nevma' ),
+			'user_email'        => __( 'Email Δωρητή', 'nevma' ),
+			'user_name'         => __( 'Όνομα Δωρητή', 'nevma' ),
+			'user_surname'      => __( 'Επώνυμο Δωρητή', 'nevma' ),
+			'user_address'      => __( 'Διεύθυνση Δωρητή', 'nevma' ),
+			'user_town'         => __( 'Πόλη Δωρητή', 'nevma' ),
+			'user_postal'       => __( 'Ταχυδρομικός Κώδικας Δωρητή', 'nevma' ),
+			'user_telephone'    => __( 'Τηλέφωνο Δωρηρή', 'nevma' ),
+			'dead_name'         => __( 'Όνομα Αποθανόντος', 'nevma' ),
+			'dead_relative'     => __( 'Συγγένεια Αποθανόντος', 'nevma' ),
+			'dead_message'      => __( 'Μήνυμα Αποθανόντος', 'nevma' ),
+			'timologio_company' => __( 'Εταιρεία Τιμολογίου', 'nevma' ),
+			'timologio_afm'     => __( 'ΑΦΜ Τιμολογίου', 'nevma' ),
+			'timologio_doy'     => __( 'ΔΟΥ Τιμολογίου', 'nevma' ),
+			'nvm_radio_choice'  => __( 'Ποσό Δωρεάς', 'nevma' ),
+		);
 
-		if ( isset( $values['nvm_radio_choice'] ) ) {
-
-			$item->add_meta_data( __( 'nvm_radio_choice', 'nevma' ), $values['nvm_radio_choice'] );
-		}
-		if ( isset( $values['type_of_donation'] ) ) {
-
-			$item->add_meta_data( __( 'Τύπος Δωρεάς', 'nevma' ), $values['type_of_donation'] );
+		// Loop through custom keys and add them to the order item if they exist.
+		foreach ( $custom_keys as $key => $label ) {
+			if ( isset( $values[ $key ] ) && ! empty( $values[ $key ] ) ) {
+				$item->add_meta_data( $label, sanitize_text_field( $values[ $key ] ) );
+			}
 		}
 	}
+
+	/**
+	 * Update billing details with custom donation data when the order is created.
+	 *
+	 * @param WC_Order $order The WooCommerce order object.
+	 * @param array    $data  Posted checkout data.
+	 */
+	public function update_billing_details_from_donation( $order, $data ) {
+		// Get cart items.
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+
+			// Update billing fields only if custom donation data exists.
+			if ( isset( $cart_item['user_name'] ) ) {
+				$order->set_billing_first_name( sanitize_text_field( $cart_item['user_name'] ) );
+			}
+
+			if ( isset( $cart_item['user_surname'] ) ) {
+				$order->set_billing_last_name( sanitize_text_field( $cart_item['user_surname'] ) );
+			}
+
+			if ( isset( $cart_item['user_email'] ) ) {
+				$order->set_billing_email( sanitize_email( $cart_item['user_email'] ) );
+			}
+
+			if ( isset( $cart_item['user_telephone'] ) ) {
+				$order->set_billing_phone( sanitize_text_field( $cart_item['user_telephone'] ) );
+			}
+
+			// If you only want to update the first item, break the loop.
+			break;
+		}
+	}
+
+
+
+
 
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
 
@@ -917,7 +979,7 @@ class Product {
 	 * @param int     $post_id The ID of the product being saved.
 	 * @param WP_Post $post The product post object.
 	 */
-	function nvm_set_product_virtual_on_save( $post_id, $post ) {
+	function set_product_virtual_on_save( $post_id, $post ) {
 		// Ensure this is a product and not an autosave or revision.
 		if ( 'product' !== $post->post_type || wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 			return;
@@ -935,5 +997,54 @@ class Product {
 				$product->save();
 			}
 		}
+	}
+	/**
+	 * Remove billing/shipping fields if cart contains donor product
+	 */
+	public function remove_checkout_fields( $fields ) {
+		// Get cart items
+		$cart_items = WC()->cart->get_cart();
+
+		// Check if any cart item is a donor product
+		$has_donor_product = false;
+		foreach ( $cart_items as $cart_item ) {
+			$product = $cart_item['data'];
+			if ( $this->product_is_donor( $product ) ) {
+				$has_donor_product = true;
+				break;
+			}
+		}
+
+		// If cart has donor product, remove shipping fields
+		if ( $has_donor_product ) {
+			unset( $fields['shipping'] );
+
+			// Remove billing fields we don't need
+			unset( $fields['billing'] );
+		}
+
+		// Remove order comments/additional information field
+		unset( $fields['order']['order_comments'] );
+
+		return $fields;
+	}
+
+	/**
+	 * Add donor class to checkout if cart contains donor products
+	 */
+	public function add_donor_class_to_checkout( $classes ) {
+		// Get cart items
+		$cart_items = WC()->cart->get_cart();
+
+		// Check if any cart item is a donor product
+		foreach ( $cart_items as $cart_item ) {
+			$product = $cart_item['data'];
+			if ( $this->product_is_donor( $product ) ) {
+				$classes[] = 'has-donor-product';
+				break;
+			}
+		}
+
+		return $classes;
 	}
 }
