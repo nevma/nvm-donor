@@ -169,7 +169,7 @@ class Product {
 			'nvm_epistoli',
 			array(
 				'type'     => 'checkbox',
-				'label'    => __( 'Αν επιθυμείτε ευχαριστήρια επιστολή, παρακαλούμε συμπληρώστε τα στοιχεία του παραλήπτη', 'nevma' ),
+				'label'    => __( 'Επιθυμείτε ευχαριστήρια επιστολή', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'company' ),
 			)
@@ -824,7 +824,7 @@ class Product {
 		// Target specific product for donations.
 		$product = wc_get_product( $product_id );
 
-		if ( ! empty( $this->product_is_donor( $product ) ) ) {
+		if ( $this->product_is_donor( $product ) ) {
 			// Get the checkout URL
 			$checkout_url = wc_get_checkout_url();
 
