@@ -72,6 +72,13 @@ class Product {
 		return false;
 	}
 
+	/**
+	 * Get and display the donor type selection field.
+	 *
+	 * Retrieves the selected donor type from session or checkout,
+	 * sets up the radio options for individual/corporate/memoriam donations,
+	 * and renders the form field.
+	 */
 	public function get_donor_type() {
 
 		$chosen = WC()->session->get( 'type_of_donation' );
@@ -378,8 +385,13 @@ class Product {
 		wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 	}
 
+	/**
+	 * Modify the add to cart button text for donor products.
+	 *
+	 * @param string $text The default button text.
+	 * @return string Modified button text.
+	 */
 	public function add_to_cart_button_text_single( $text ) {
-
 		global $product;
 
 		$product_is_donor = $this->product_is_donor( $product );
@@ -787,11 +799,11 @@ class Product {
 		return $cart_item_data;
 	}
 
-		/**
-		 * Adjust product price based on radio choice.
-		 *
-		 * @param WC_Cart $cart The WooCommerce cart object.
-		 */
+	/**
+	 * Adjust product price based on radio choice.
+	 *
+	 * @param WC_Cart $cart The WooCommerce cart object.
+	 */
 	public function adjust_product_price_based_on_choice( $cart ) {
 
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
@@ -831,9 +843,7 @@ class Product {
 		// Target specific product for donations.
 		$product = wc_get_product( $product_id );
 
-		error_log( $this->product_is_donor( $product ) );
-
-		if ( ! empty( $this->product_is_donor( $product ) ) ) {
+		if ( $this->product_is_donor( $product ) ) {
 			// Get the checkout URL
 			$checkout_url = wc_get_checkout_url();
 
