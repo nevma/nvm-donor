@@ -287,7 +287,7 @@ class Product {
 		);
 
 		woocommerce_form_field(
-			'nvm_dead',
+			'nvm_dead_name',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Ονοματεπώνυμο θανόντος/ ούσης', 'nevma' ),
@@ -302,22 +302,22 @@ class Product {
 				'type'     => 'checkbox',
 				'label'    => __( 'Eπιθυμείτε αναγγελία', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-wide', 'memoriam' ),
+				'class'    => array( 'form-row-wide' ),
 			)
 		);
 
 		woocommerce_form_field(
-			'nvm_relative',
+			'nvm_dead_relative',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Όνομα συγγενούς θανόντος/ούσης', 'nevma' ),
 				'required' => false,
-				'class'    => array( 'form-row-wide', 'memoriam' ),
+				'class'    => array( 'form-row-wide' ),
 			)
 		);
 
 		woocommerce_form_field(
-			'nvm_relative',
+			'nvm_dead_message',
 			array(
 				'type'     => 'textarea',
 				'label'    => __( 'Μήνυμα', 'nevma' ),
@@ -435,6 +435,7 @@ class Product {
 				nvm_showStep(nvm_currentStep);         // Initialize the first step
 				nvm_toggleFields();                    // Initialize visibility based on the selected donation type
 				nvm_toggleEpistoliFields();            // Initialize visibility based on the epistoli
+				nvm_toggleAnagkeliaFields();           // Initialize visibility Anagkelia
 				nvm_setupDonationAmountHandler();      // Initialize donation amount input behavior
 				nvm_setupDonationTypeHandler();       // Initialize donation type toggle behavior
 
@@ -449,6 +450,12 @@ class Product {
 				if (epilostoliCheckbox) {
 					epilostoliCheckbox.addEventListener('change', nvm_toggleEpistoliFields);
 					nvm_toggleEpistoliFields(); // Initialize invoice fields based on the checkbox state
+				}
+
+				const anagkeliaCheckbox = document.getElementById('nvm_dead');
+				if (anagkeliaCheckbox) {
+					anagkeliaCheckbox.addEventListener('change', nvm_toggleAnagkeliaFields);
+					nvm_toggleAnagkeliaFields(); // Initialize invoice fields based on the checkbox state
 				}
 
 			});
@@ -606,7 +613,7 @@ class Product {
 				const emailField = document.getElementById('nvm_email_company_field');
 
 				// Ensure fields exist before trying to change their display
-				if (companyField && surnameField && spaceField &&emailField ) {
+				if (companyField && surnameField && spaceField && emailField ) {
 					const displayStyle = invoiceCheckbox.checked ? 'block' : 'none';
 					companyField.style.display = displayStyle;
 					surnameField.style.display = displayStyle;
@@ -614,6 +621,24 @@ class Product {
 					emailField.style.display = displayStyle;
 				}
 			}
+
+			/**
+			 * Show or hide invoice fields based on the checkbox state
+			 */
+			function nvm_toggleAnagkeliaFields() {
+				const anagkeliaCheckbox = document.getElementById('nvm_dead');
+				if (!anagkeliaCheckbox) return;
+
+				const relativeField = document.getElementById('nvm_dead_relative_field');
+				const messageField = document.getElementById('nvm_dead_message_field');
+
+				if (relativeField && messageField) {
+					const displayStyle = anagkeliaCheckbox.checked ? 'block' : 'none';
+					relativeField.style.display = displayStyle;
+					messageField.style.display = displayStyle;
+				}
+			}
+
 		</script>
 
 		<style>
