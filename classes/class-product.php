@@ -52,13 +52,20 @@ class Product {
 	}
 
 
+	/**
+	 * Check if product is a donor product.
+	 *
+	 * @param WC_Product $product The product object.
+	 * @return boolean True if donor product, false otherwise.
+	 */
 	public function product_is_donor( $product ) {
 		if ( class_exists( 'ACF' ) ) {
-			$donor_product_id = get_field( 'activate' );
+
+			$id               = $product->get_id();
+			$donor_product_id = get_field( 'activate', $id );
 
 			if ( $donor_product_id ) {
-				$donor_product_id = $product->get_id();
-				return $donor_product_id;
+				return true;
 			}
 		}
 
@@ -824,7 +831,9 @@ class Product {
 		// Target specific product for donations.
 		$product = wc_get_product( $product_id );
 
-		if ( $this->product_is_donor( $product ) ) {
+		error_log( $this->product_is_donor( $product ) );
+
+		if ( ! empty( $this->product_is_donor( $product ) ) ) {
 			// Get the checkout URL
 			$checkout_url = wc_get_checkout_url();
 
