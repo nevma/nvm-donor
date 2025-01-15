@@ -101,8 +101,11 @@ class Product {
 	}
 
 	public function get_donor_prices() {
-		$chosen  = WC()->session->get( 'nvm_radio_choice' );
-		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
+
+		$chosen = WC()->session->get( 'nvm_radio_choice' );
+		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
+		$chosen = empty( $chosen ) ? 'custom' : $chosen;
+
 		$options = array();
 		$minimum = 1;
 
@@ -128,7 +131,6 @@ class Product {
 		}
 
 		$options['custom'] = esc_html__( 'Άλλο Ποσό', 'nevma' );
-		$chosen            = empty( $chosen ) ? 'custom' : $chosen;
 
 		$args = array(
 			'type'    => 'radio',
