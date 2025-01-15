@@ -280,7 +280,7 @@ class Product {
 		);
 
 		woocommerce_form_field(
-			'nvm_town',
+			'nvm_postal',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Τ.Κ.', 'nevma' ),
@@ -784,6 +784,56 @@ class Product {
 
 		if ( isset( $_POST['type_of_donation'] ) ) {
 			$cart_item_data['type_of_donation'] = $_POST['type_of_donation'];
+		}
+
+		if ( isset( $_POST['nvm_epistoli'] ) ) {
+			$cart_item_data['epistoli_name']     = $_POST['nvm_name_company'];
+			$cart_item_data['epistoli_surname']  = $_POST['nvm_surname_company'];
+			$cart_item_data['epistoli_position'] = $_POST['nvm_space_company'];
+			$cart_item_data['epistoli_email']    = $_POST['nvm_email_company'];
+		}
+
+		if ( isset( $_POST['nvm_email'] ) ) {
+			$cart_item_data['user_email'] = $_POST['nvm_email'];
+		}
+
+		if ( isset( $_POST['nvm_name'] ) ) {
+			$cart_item_data['user_name'] = $_POST['nvm_name'];
+		}
+
+		if ( isset( $_POST['nvm_surname'] ) ) {
+			$cart_item_data['user_surname'] = $_POST['nvm_surname'];
+		}
+
+		if ( isset( $_POST['nvm_address'] ) ) {
+			$cart_item_data['user_addres'] = $_POST['nvm_address'];
+		}
+
+		if ( isset( $_POST['nvm_town'] ) ) {
+			$cart_item_data['user_town'] = $_POST['nvm_town'];
+		}
+
+		if ( isset( $_POST['nvm_postal'] ) ) {
+			$cart_item_data['user_postal'] = $_POST['nvm_postal'];
+		}
+
+		if ( isset( $_POST['nvm_telephone'] ) ) {
+			$cart_item_data['user_telephone'] = $_POST['nvm_telephone'];
+		}
+
+		if ( isset( $_POST['nvm_dead_name'] ) ) {
+			$cart_item_data['dead_name'] = $_POST['nvm_dead_name'];
+		}
+
+		if ( isset( $_POST['nvm_dead'] ) ) {
+			$cart_item_data['dead_relative'] = $_POST['nvm_dead_relative'];
+			$cart_item_data['dead_message']  = $_POST['nvm_dead_message'];
+		}
+
+		if ( isset( $_POST['nvm_timologio'] ) ) {
+			$cart_item_data['timologio_company'] = $_POST['nvm_company'];
+			$cart_item_data['timologio_afm']     = $_POST['nvm_afm'];
+			$cart_item_data['timologio_doy']     = $_POST['nvm_doy'];
 		}
 
 		if ( isset( $_POST['nvm_radio_choice'] ) ) {
