@@ -310,7 +310,7 @@ class Product {
 			'nvm_dead_name',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Ονοματεπώνυμο θανό��������τος/ ούσης', 'nevma' ),
+				'label'    => __( 'Ονοματεπώνυμο θανόντος/ ούσης', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
