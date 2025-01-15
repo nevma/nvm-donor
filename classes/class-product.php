@@ -99,8 +99,8 @@ class Product {
 	}
 
 	public function get_donor_prices() {
-		// $chosen = WC()->session->get( 'radio_chosen' );
-		// $chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
+		$chosen  = WC()->session->get( 'nvm_radio_choice' );
+		$chosen  = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
 		$options = array();
 		$minimum = 1;
 
@@ -126,8 +126,7 @@ class Product {
 		}
 
 		$options['custom'] = esc_html__( 'Άλλο Ποσό', 'nevma' );
-		// $chosen            = empty( $chosen ) ? array_key_first( $options ) : $chosen;
-		$chosen = 'custom';
+		$chosen            = empty( $chosen ) ? 'custom' : $chosen;
 
 		$args = array(
 			'type'    => 'radio',
@@ -145,7 +144,7 @@ class Product {
 			'donation_amount',
 			array(
 				'type'              => 'number',
-				'label'             => __( 'Ποσό Δωρεάς', 'nevma' ),
+				'label'             => __( 'Ποσό Δωρεάς σε ευρώ', 'nevma' ),
 				'required'          => false,
 				'class'             => array( 'form-row-wide' ),
 				'placeholder'       => __( 'Προσθέστε το Ποσό / Eλάχιστό', 'nevma' ) . ' ' . $minimum . ' (€)',
@@ -421,13 +420,17 @@ class Product {
 		echo '</div>';
 
 		echo '<div id="second-step" class="step">';
+		echo '<button type="button steps" onclick="nvm_prevStep()"><-</button>';
 		$this->get_donor_details();
 
-		echo '<button type="button steps" onclick="nvm_prevStep()">Previous</button>
-				<button type="button" onclick="nvm_nextStep()">Next</button>';
+		echo '<button type="button" onclick="nvm_nextStep()">Next</button>';
 		echo '</div>';
 		?>
 		<style>
+
+			#donation_amount{
+				text-align: center;
+			}
 			.button.steps{
 				border-radius: 0rem;
 				border-color: var(--wp--preset--color--contrast);
@@ -578,7 +581,7 @@ class Product {
 
 					if (donationChoice === 'custom') {
 						if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 5) {
-							alert('Please enter a valid custom amount (minimum 5€).');
+							alert('Παρακαλώ προσθέστε ένα ποσό πληρωμής.');
 							return;
 						}
 					}
