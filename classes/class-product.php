@@ -434,6 +434,7 @@ class Product {
 			document.addEventListener('DOMContentLoaded', function () {
 				nvm_showStep(nvm_currentStep);         // Initialize the first step
 				nvm_toggleFields();                    // Initialize visibility based on the selected donation type
+				nvm_toggleEpistoliFields();            // Initialize visibility based on the epistoli
 				nvm_setupDonationAmountHandler();      // Initialize donation amount input behavior
 				nvm_setupDonationTypeHandler();       // Initialize donation type toggle behavior
 
@@ -443,6 +444,13 @@ class Product {
 					invoiceCheckbox.addEventListener('change', nvm_toggleInvoiceFields);
 					nvm_toggleInvoiceFields(); // Initialize invoice fields based on the checkbox state
 				}
+
+				const epilostoliCheckbox = document.getElementById('nvm_epistoli');
+				if (epilostoliCheckbox) {
+					epilostoliCheckbox.addEventListener('change', nvm_toggleEpistoliFields);
+					nvm_toggleEpistoliFields(); // Initialize invoice fields based on the checkbox state
+				}
+
 			});
 
 			/**
@@ -581,6 +589,29 @@ class Product {
 					relativeField.style.display = displayStyle;
 					afmField.style.display = displayStyle;
 					douField.style.display = displayStyle;
+				}
+			}
+
+			/**
+			 * Show or hide invoice fields based on the checkbox state
+			 */
+			function nvm_toggleEpistoliFields() {
+				const invoiceCheckbox = document.getElementById('nvm_epistoli');
+				if (!invoiceCheckbox) return; // Exit if checkbox is not found
+
+				// Fields to toggle
+				const companyField = document.getElementById('nvm_name_company_field');
+				const surnameField = document.getElementById('nvm_surname_company_field');
+				const spaceField = document.getElementById('nvm_space_company_field');
+				const emailField = document.getElementById('nvm_email_company_field');
+
+				// Ensure fields exist before trying to change their display
+				if (companyField && surnameField && spaceField &&emailField ) {
+					const displayStyle = invoiceCheckbox.checked ? 'block' : 'none';
+					companyField.style.display = displayStyle;
+					surnameField.style.display = displayStyle;
+					spaceField.style.display = displayStyle;
+					emailField.style.display = displayStyle;
 				}
 			}
 		</script>
