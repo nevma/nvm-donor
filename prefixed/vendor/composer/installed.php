@@ -3,7 +3,7 @@
         'name' => 'nvm/donor',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '1edb568a3dbb11ca886d175d25df1c0e72dd2694',
+        'reference' => 'a0f81148bec9ee8ea5140f567788aae3cc6379e1',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'nvm/donor' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '1edb568a3dbb11ca886d175d25df1c0e72dd2694',
+            'reference' => 'a0f81148bec9ee8ea5140f567788aae3cc6379e1',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../../',
             'aliases' => array(),

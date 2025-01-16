@@ -41,6 +41,11 @@ class Product {
 		add_filter( 'body_class', array( $this, 'add_donor_class_to_checkout' ) );
 
 		add_action( 'woocommerce_checkout_create_order', array( $this, 'update_billing_details_from_donation' ), 10, 2 );
+
+		add_action( 'wp_head', array( $this, 'add_donor_checkout_styles' ) );
+
+		// Add shortcode
+		// add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
 	}
 
 
@@ -235,7 +240,7 @@ class Product {
 			)
 		);
 
-		echo __( 'Στοιχεία Δωρητή', 'nevma' );
+		echo '<h4>' . __( 'Στοιχεία Δωρητή', 'nevma' ) . '</h4>';
 		woocommerce_form_field(
 			'nvm_email',
 			array(
@@ -350,7 +355,7 @@ class Product {
 			'nvm_timologio',
 			array(
 				'type'     => 'checkbox',
-				'label'    => __( 'Έκδοση Τιμολογίου', 'nevma' ),
+				'label'    => __( 'Έκδοση τιμολογίου', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'company', 'memoriam' ),
 			)
@@ -360,7 +365,7 @@ class Product {
 			'nvm_company',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'ΕΠΩΝΥΜΙΑ', 'nevma' ),
+				'label'    => __( 'Επωνυμία εταιρίας', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'timologio' ),
 			)
@@ -405,7 +410,7 @@ class Product {
 		if ( empty( $product_is_donor ) ) {
 			return $text;
 		}
-		return __( 'Donor Amount', 'nevma' );
+		return __( 'Ολοκλήρωση Δωρεάς', 'nevma' );
 	}
 
 	public function add_content_after_addtocart_button() {
@@ -447,7 +452,7 @@ class Product {
 		echo '</div>';
 
 		echo '<div id="second-step" class="step">';
-		echo '<button type="button" onclick="nvm_prevStep()"><-</button>';
+		echo '<button id="second-step-back" type="button" onclick="nvm_prevStep()"><< Προηγούμενο</button>';
 		$this->get_donor_details();
 		echo '</div>';
 		echo wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
@@ -491,9 +496,18 @@ class Product {
 			 */
 			function nvm_showStep(step) {
 				const steps = document.querySelectorAll('.step');
+				const step2Button = document.querySelector('.single_add_to_cart_button ');
+
 				steps.forEach((stepDiv, index) => {
 					stepDiv.classList.toggle('active', index === step - 1);
 				});
+
+				// Show the button only on step 2
+				if (step === 2 && step2Button) {
+					step2Button.style.display = 'block';
+				} else if (step2Button) {
+					step2Button.style.display = 'none';
+				}
 			}
 
 			/**
@@ -668,12 +682,43 @@ class Product {
 
 		<style>
 
+			input {
+				background-color: #f5eeee;
+			}
+
+			#second-step-back{
+				font-size: 14px;
+				background: transparent;
+				border: 0px;
+				color: gray;
+				padding-bottom: 15px;
+			}
+
+			.wp-block-woocommerce-add-to-cart-form .variations_button, .wp-block-woocommerce-add-to-cart-form form.cart {
+				display: block;
+			}
+			.wp-block-woocommerce-product-price,
+			.wp-block-post-title,
+			.wp-block-woocommerce-product-meta,
+			.woocommerce-tabs.wc-tabs-wrapper{
+				display: none;
+			}
+
+			.woocommerce div.product form.cart div.quantity{
+				display: none;
+			}
+			.safe {
+				font-size:14px;
+			}
 			#donation_amount{
 				text-align: center;
 			}
-			.button.steps{
-				border-radius: 0rem;
-				border-color: var(--wp--preset--color--contrast);
+			.button.steps, .single_add_to_cart_button.button{
+				background-color: #eb008b;
+				border-radius: 40px;
+				color: #fff;
+				/* border-radius: 0rem; */
+				border-color: #eb008b;
 				border-width: 2px;
 
 				font-family: inherit;
@@ -688,17 +733,24 @@ class Product {
 				text-decoration: none;
 				width: 100%;
 			}
-
-			.button.steps:hover{
-				background-color: var(--wp--preset--color--contrast);
-				color: var(--wp--preset--color--base);
+			.single_add_to_cart_button.button{
+				grid-column: span;
 			}
-			.step {
+
+			.button.steps:hover, .single_add_to_cart_button.button:hover{
+				background-color: #fff;
+				color: #eb008b;
+			}
+			/* .step {
 				min-height: 400px;
-			}
+			} */
 
-			form.cart{
+			form.cart,
+			.safe {
 				max-width: 450px;
+			}
+			.safe {
+				display:block;
 			}
 			.step{
 				display:none;
@@ -1046,5 +1098,48 @@ class Product {
 		}
 
 		return $classes;
+	}
+
+	/**
+	 * Shortcode to display donor form for a specific product.
+	 *
+	 * @param array $atts Shortcode attributes with 'product_id'.
+	 * @return string HTML output of the donor form.
+	 */
+	public function donor_form_shortcode( $atts ) {
+		$atts = shortcode_atts(
+			array(
+				'product_id' => 0,
+			),
+			$atts
+		);
+
+		if ( empty( $atts['product_id'] ) ) {
+			return __( 'Product ID is required', 'nevma' );
+		}
+
+		$product = wc_get_product( $atts['product_id'] );
+		if ( ! $product || ! $this->product_is_donor( $product ) ) {
+			return __( 'Invalid donor product', 'nevma' );
+		}
+
+		ob_start();
+		$this->add_donation_fields_to_product();
+		return ob_get_clean();
+	}
+
+	public function add_donor_checkout_styles() {
+		if ( ! is_checkout() ) {
+			return;
+		}
+		?>
+		<style>
+			.has-donor-product .woocommerce-billing-fields,
+			.has-donor-product .col-2,
+			.has-donor-product #order_review_heading {
+				display: none;
+			}
+		</style>
+		<?php
 	}
 }
