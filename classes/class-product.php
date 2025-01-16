@@ -45,7 +45,7 @@ class Product {
 		add_action( 'wp_head', array( $this, 'add_donor_checkout_styles' ) );
 
 		// Add shortcode
-		// add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
+		add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
 	}
 
 
@@ -90,7 +90,7 @@ class Product {
 	 * sets up the radio options for individual/corporate/memoriam donations,
 	 * and renders the form field.
 	 */
-	public function get_donor_type() {
+	public function get_donor_type( $product ) {
 
 		$chosen = WC()->session->get( 'type_of_donation' );
 		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'type_of_donation' ) : $chosen;
@@ -100,7 +100,7 @@ class Product {
 
 		if ( class_exists( 'ACF' ) ) {
 
-			$array_donor = get_field( 'donor_prices' );
+			$array_donor = get_field( 'donor_prices', $product->get_id() );
 			if ( ! empty( $array_donor ) ) {
 				foreach ( $array_donor as $donor ) {
 					$donor_amount             = $donor['amount'];
@@ -125,7 +125,7 @@ class Product {
 			woocommerce_form_field( 'type_of_donation', $args, $chosen );
 	}
 
-	public function get_donor_prices() {
+	public function get_donor_prices( $product ) {
 
 		$chosen = WC()->session->get( 'nvm_radio_choice' );
 		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
@@ -135,9 +135,9 @@ class Product {
 		$minimum = 1;
 
 		if ( class_exists( 'ACF' ) ) {
-			$minimum = get_field( 'minimun_amount' );
+			$minimum = get_field( 'minimun_amount', $product->get_id() );
 
-			$array_donor = get_field( 'donor_prices' );
+			$array_donor = get_field( 'donor_prices', $product->get_id() );
 			if ( ! empty( $array_donor ) ) {
 				foreach ( $array_donor as $donor ) {
 					$donor_amount             = $donor['amount'];
@@ -434,9 +434,11 @@ class Product {
 	/**
 	 * Add donation fields to the product page.
 	 */
-	public function add_donation_fields_to_product() {
-		global $product;
+	public function add_donation_fields_to_product( $product ) {
 
+		if ( is_product() ) {
+			global $product;
+		}
 		// Target specific product for donations.
 		$donor = $this->product_is_donor( $product );
 
@@ -446,8 +448,8 @@ class Product {
 
 		echo '<div id="first-step" class="step active">';
 
-		$this->get_donor_type();
-		$this->get_donor_prices();
+		$this->get_donor_type( $product );
+		$this->get_donor_prices( $product );
 		echo '<button type="button" class="button steps" onclick="nvm_nextStep()">Επόμενο / Next</button>';
 		echo '</div>';
 
@@ -456,6 +458,7 @@ class Product {
 		$this->get_donor_details();
 		echo '</div>';
 		echo wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
+
 		?>
 		<script>
 			let nvm_currentStep = 1;
@@ -677,11 +680,9 @@ class Product {
 					messageField.style.display = displayStyle;
 				}
 			}
-
 		</script>
 
 		<style>
-
 			input {
 				background-color: #f5eeee;
 			}
@@ -1099,7 +1100,6 @@ class Product {
 
 		return $classes;
 	}
-
 	/**
 	 * Shortcode to display donor form for a specific product.
 	 *
@@ -1107,24 +1107,31 @@ class Product {
 	 * @return string HTML output of the donor form.
 	 */
 	public function donor_form_shortcode( $atts ) {
+		// Define default attributes.
 		$atts = shortcode_atts(
 			array(
 				'product_id' => 0,
 			),
-			$atts
+			$atts,
+			'donor_form'
 		);
 
-		if ( empty( $atts['product_id'] ) ) {
+		// Validate product ID.
+		$product_id = intval( $atts['product_id'] );
+		if ( $product_id <= 0 ) {
 			return __( 'Product ID is required', 'nevma' );
 		}
 
-		$product = wc_get_product( $atts['product_id'] );
+		// Fetch product without affecting global $product.
+		$product = wc_get_product( $product_id );
+
 		if ( ! $product || ! $this->product_is_donor( $product ) ) {
 			return __( 'Invalid donor product', 'nevma' );
 		}
 
+		// Capture the output of the donation form.
 		ob_start();
-		$this->add_donation_fields_to_product();
+		echo $this->add_donation_fields_to_product( $product );
 		return ob_get_clean();
 	}
 
