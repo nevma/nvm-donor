@@ -400,6 +400,7 @@ class Product {
 		if ( $product_is_donor ) {
 			return $text;
 		}
+
 		return __( 'Ολοκλήρωση Δωρεάς', 'nevma' );
 	}
 
@@ -408,13 +409,15 @@ class Product {
 
 		$product_is_donor = $this->product_is_donor( $product );
 
-		if ( $product_is_donor ) {
-			$donor_text = Product_Donor::get_donor_message( $product );
-
-			echo '<span class="safe">';
-			echo wp_kses_post( $donor_text );
-			echo '</span>';
+		if ( ! $product_is_donor ) {
+			return;
 		}
+
+		$donor_text = Product_Donor::get_donor_message( $product );
+
+		echo '<span class="safe">';
+		echo wp_kses_post( $donor_text );
+		echo '</span>';
 	}
 
 
