@@ -426,13 +426,15 @@ class Product {
 	 */
 	public function add_donation_fields_to_product( $product ) {
 
+		error_log( 'Donations' );
+
 		if ( is_product() ) {
 			global $product;
 		}
 		// Target specific product for donations.
-		$donor = $this->product_is_donor( $product );
+		$product_is_donor = $this->product_is_donor( $product );
 
-		if ( $donor ) {
+		if ( ! $product_is_donor ) {
 			return;
 		}
 
