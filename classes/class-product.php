@@ -397,7 +397,7 @@ class Product {
 
 		$product_is_donor = $this->product_is_donor( $product );
 
-		if ( $product_is_donor ) {
+		if ( ! $product_is_donor ) {
 			return $text;
 		}
 
