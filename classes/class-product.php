@@ -5,6 +5,8 @@
  */
 namespace Nvm\Donor;
 
+use Nvm\Donor\Product_Donor;
+
 /**
  * Check that the file is not accessed directly.
  */
@@ -70,17 +72,7 @@ class Product {
 	 * @return boolean True if donor product, false otherwise.
 	 */
 	public function product_is_donor( $product ) {
-		if ( class_exists( 'ACF' ) ) {
-
-			$id               = $product->get_id();
-			$donor_product_id = get_field( 'activate', $id );
-
-			if ( $donor_product_id ) {
-				return true;
-			}
-		}
-
-		return false;
+		return Product_Donor::is_donor_product( $product );
 	}
 
 	/**
@@ -98,31 +90,29 @@ class Product {
 
 		$options = array();
 
-		if ( class_exists( 'ACF' ) ) {
+		$array_donor = Product_Donor::get_donor_prices( $product );
 
-			$array_donor = get_field( 'donor_prices', $product->get_id() );
-			if ( ! empty( $array_donor ) ) {
-				foreach ( $array_donor as $donor ) {
-					$donor_amount             = $donor['amount'];
-					$options[ $donor_amount ] = $donor_amount . '€';
-				}
+		if ( ! empty( $array_donor ) ) {
+			foreach ( $array_donor as $donor ) {
+				$donor_amount             = $donor['amount'];
+				$options[ $donor_amount ] = $donor_amount . '€';
 			}
 		}
 
-			$options = array(
-				'individual' => __( 'ΑΤΟΜΙΚΗ', 'nevma' ),
-				'corporate'  => __( 'ΕΤΑΙΡΙΚΗ', 'nevma' ),
-				'memoriam'   => __( 'ΕΙΣ ΜΝΗΜΗ', 'nevma' ),
-			);
+		$options = array(
+			'individual' => __( 'ΑΤΟΜΙΚΗ', 'nevma' ),
+			'corporate'  => __( 'ΕΤΑΙΡΙΚΗ', 'nevma' ),
+			'memoriam'   => __( 'ΕΙΣ ΜΝΗΜΗ', 'nevma' ),
+		);
 
-			$args = array(
-				'type'    => 'radio',
-				'class'   => array( 'form-row-wide', 'donation-type' ),
-				'options' => $options,
-				'default' => $chosen,
-			);
+		$args = array(
+			'type'    => 'radio',
+			'class'   => array( 'form-row-wide', 'donation-type' ),
+			'options' => $options,
+			'default' => $chosen,
+		);
 
-			woocommerce_form_field( 'type_of_donation', $args, $chosen );
+		woocommerce_form_field( 'type_of_donation', $args, $chosen );
 	}
 
 	public function get_donor_prices( $product ) {
@@ -161,7 +151,7 @@ class Product {
 			'type'    => 'radio',
 			'class'   => array( 'form-row-wide' ),
 			'options' => $options,
-			'default' => $chosen,
+			// 'default' => $chosen,
 		);
 
 		echo '<div id="donation-choices">';
@@ -407,7 +397,7 @@ class Product {
 
 		$product_is_donor = $this->product_is_donor( $product );
 
-		if ( empty( $product_is_donor ) ) {
+		if ( $product_is_donor ) {
 			return $text;
 		}
 		return __( 'Ολοκλήρωση Δωρεάς', 'nevma' );
@@ -415,17 +405,14 @@ class Product {
 
 	public function add_content_after_addtocart_button() {
 		global $product;
-		if ( class_exists( 'ACF' ) ) {
-			$product_is_donor = $this->product_is_donor( $product );
 
-			if ( empty( $product_is_donor ) ) {
-				return;
-			}
+		$product_is_donor = $this->product_is_donor( $product );
 
-			$donor_text = get_field( 'text_after' );
+		if ( $product_is_donor ) {
+			$donor_text = Product_Donor::get_donor_message( $product );
 
 			echo '<span class="safe">';
-			echo $donor_text;
+			echo wp_kses_post( $donor_text );
 			echo '</span>';
 		}
 	}
@@ -442,7 +429,7 @@ class Product {
 		// Target specific product for donations.
 		$donor = $this->product_is_donor( $product );
 
-		if ( empty( $donor ) ) {
+		if ( $donor ) {
 			return;
 		}
 
@@ -721,7 +708,6 @@ class Product {
 				/* border-radius: 0rem; */
 				border-color: #eb008b;
 				border-width: 2px;
-
 				font-family: inherit;
 				font-size: var(--wp--preset--font-size--small);
 				font-style: normal;
@@ -742,9 +728,6 @@ class Product {
 				background-color: #fff;
 				color: #eb008b;
 			}
-			/* .step {
-				min-height: 400px;
-			} */
 
 			form.cart,
 			.safe {
@@ -1041,7 +1024,7 @@ class Product {
 		// Load the product object.
 		$product = wc_get_product( $post_id );
 
-		if ( ! empty( $this->product_is_donor( $product ) ) ) {
+		if ( $this->product_is_donor( $product ) ) {
 
 			// Check if it's not already virtual.
 			if ( $product && ! $product->is_virtual() ) {
@@ -1131,7 +1114,9 @@ class Product {
 
 		// Capture the output of the donation form.
 		ob_start();
-		echo $this->add_donation_fields_to_product( $product );
+
+		$this->add_donation_fields_to_product( $product );
+		// Add the add to cart button
 		return ob_get_clean();
 	}
 

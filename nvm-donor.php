@@ -21,6 +21,7 @@ namespace Nvm;
 
 use Nvm\Donor\Acf as Nvm_Acf;
 use Nvm\Donor\Product as Nvm_Product;
+use Nvm\Donor\Product_Donor as Nvm_Product_Type;
 
 /**
  * Check that the file is not accessed directly.
@@ -105,6 +106,7 @@ class Donor {
 
 		// Autoload.
 		self::autoload();
+		self::initiate_product_type();
 		self::initiate_acf_options();
 		self::initiate_product_donor();
 
@@ -167,11 +169,15 @@ class Donor {
 	}
 
 	public function initiate_acf_options() {
-		$init = new Nvm_Acf();
+		new Nvm_Acf();
 	}
 
 	public function initiate_product_donor() {
-		$init = new Nvm_Product();
+		new Nvm_Product();
+	}
+
+	public function initiate_product_type() {
+		new Nvm_Product_Type();
 	}
 
 
