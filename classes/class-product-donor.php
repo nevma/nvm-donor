@@ -188,8 +188,8 @@ class Product_Donor extends WC_Product_Simple {
 	 * @param int $product_id Product ID.
 	 * @return string
 	 */
-	public static function get_donor_minimum_amount( $product_id ) {
-		$product = \wc_get_product( $product_id );
+	public static function get_donor_minimum_amount( $product ) {
+
 		if ( ! $product ) {
 			return '';
 		}
