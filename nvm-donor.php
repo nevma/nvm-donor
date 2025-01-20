@@ -19,8 +19,7 @@
  */
 namespace Nvm;
 
-use Nvm\Donor\Acf as Nvm_Acf;
-use Nvm\Donor\Product as Nvm_Product;
+use Nvm\Donor\Product_View as Nvm_Product_View;
 use Nvm\Donor\Product_Donor as Nvm_Product_Type;
 
 /**
@@ -107,7 +106,6 @@ class Donor {
 		// Autoload.
 		self::autoload();
 		self::initiate_product_type();
-		self::initiate_acf_options();
 		self::initiate_product_donor();
 
 		// Declare HPOS Compability
@@ -168,12 +166,8 @@ class Donor {
 		}
 	}
 
-	public function initiate_acf_options() {
-		new Nvm_Acf();
-	}
-
 	public function initiate_product_donor() {
-		new Nvm_Product();
+		new Nvm_Product_View();
 	}
 
 	public function initiate_product_type() {

@@ -16,18 +16,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class Product donor view & settings.
  */
-class Product {
+class Product_View {
 
 	public function __construct() {
+		add_action( 'init', array( $this, 'init' ) );
+	}
+
+	public function init() {
 
 		// Change add to cart text on single product page
-		add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'add_to_cart_button_text_single' ) );
+		add_filter( 'woocommerce_product_single_add_to_cart_text', array( $this, 'add_to_cart_button_text_single' ), 10 );
+
 		// Add Fields to product
 		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'add_donation_fields_to_product' ) );
 		// Add text field to product
-		add_action( 'woocommerce_product_meta_start', array( $this, 'add_content_after_addtocart_button' ), 20 );
-		// remove quantity
-		add_filter( 'woocommerce_is_sold_individually', array( $this, 'remove_quantity_input_field' ), 10, 2 );
+		add_action( 'woocommerce_product_meta_start', array( $this, 'add_donation_carts' ), 10 );
+		add_action( 'woocommerce_product_meta_start', array( $this, 'add_content_after_addtocart_button' ), 40 );
+
+		// Check out Fields
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'remove_checkout_fields' ) );
 
 		// Save and calculate costs
@@ -47,23 +53,28 @@ class Product {
 		add_action( 'wp_head', array( $this, 'add_donor_checkout_styles' ) );
 
 		// Add shortcode
-		add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
+		// add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
 	}
 
+	/**
+	 * Add donation cart form to product page.
+	 */
+	public function add_donation_carts() {
+		global $product;
+		do_action( 'woocommerce_before_add_to_cart_form' );
 
-	public function remove_quantity_input_field( $return, $product ) {
+		?>
+		<form class="cart" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data'>
+			<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
-		if ( is_product() ) {
+			<button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
 
-			$donor = $this->product_is_donor( $product );
+			<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
+		</form>
 
-			if ( $donor ) {
-				return true;
-			}
-		}
-		return $return;
+		<?php
+		do_action( 'woocommerce_after_add_to_cart_form' );
 	}
-
 
 	/**
 	 * Check if product is a donor product.
@@ -72,6 +83,7 @@ class Product {
 	 * @return boolean True if donor product, false otherwise.
 	 */
 	public function product_is_donor( $product ) {
+
 		return Product_Donor::is_donor_product( $product );
 	}
 
@@ -87,17 +99,6 @@ class Product {
 		$chosen = WC()->session->get( 'type_of_donation' );
 		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'type_of_donation' ) : $chosen;
 		$chosen = empty( $chosen ) ? 'individual' : $chosen;
-
-		$options = array();
-
-		$array_donor = Product_Donor::get_donor_prices( $product );
-
-		if ( ! empty( $array_donor ) ) {
-			foreach ( $array_donor as $donor ) {
-				$donor_amount             = $donor['amount'];
-				$options[ $donor_amount ] = $donor_amount . '€';
-			}
-		}
 
 		$options = array(
 			'individual' => __( 'ΑΤΟΜΙΚΗ', 'nevma' ),
@@ -124,15 +125,12 @@ class Product {
 		$options = array();
 		$minimum = 1;
 
-		if ( class_exists( 'ACF' ) ) {
-			$minimum = get_field( 'minimun_amount', $product->get_id() );
+		$minimum = Product_Donor::get_donor_minimum_amount( $product );
 
-			$array_donor = get_field( 'donor_prices', $product->get_id() );
-			if ( ! empty( $array_donor ) ) {
-				foreach ( $array_donor as $donor ) {
-					$donor_amount             = $donor['amount'];
-					$options[ $donor_amount ] = $donor_amount . '€';
-				}
+		$array_donor = Product_Donor::get_donor_prices( $product );
+		if ( ! empty( $array_donor ) ) {
+			foreach ( $array_donor as $key => $amount_donor ) {
+				$options[ $amount_donor ] = $amount_donor . '€';
 			}
 		}
 
@@ -405,6 +403,7 @@ class Product {
 	}
 
 	public function add_content_after_addtocart_button() {
+
 		global $product;
 
 		$product_is_donor = $this->product_is_donor( $product );
@@ -420,13 +419,10 @@ class Product {
 		echo '</span>';
 	}
 
-
 	/**
 	 * Add donation fields to the product page.
 	 */
 	public function add_donation_fields_to_product( $product ) {
-
-		error_log( 'Donations' );
 
 		if ( is_product() ) {
 			global $product;
@@ -995,10 +991,6 @@ class Product {
 		}
 	}
 
-
-
-
-
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
 
 		// Target specific product for donations.
@@ -1120,7 +1112,7 @@ class Product {
 		// Capture the output of the donation form.
 		ob_start();
 
-		$this->add_donation_fields_to_product( $product );
+		$this->add_donation_carts();
 		// Add the add to cart button
 		return ob_get_clean();
 	}

@@ -14,23 +14,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Product_Donor extends WC_Product_Simple {
 
 	/**
+	 * Product type.
+	 *
+	 * @var string
+	 */
+	protected $product_type = 'donor';
+
+
+	/**
 	 * Constructor for the Donor Product.
 	 *
 	 * @param mixed $product Product ID or object.
 	 */
 	public function __construct( $product = 0 ) {
-		parent::__construct( $product );
+
 		$this->product_type = 'donor';
+		parent::__construct( $product );
+		$this::init();
 	}
 
 	/**
 	 * Initialize hooks for the Donor Product.
 	 */
 	public static function init() {
+		add_action( 'woocommerce_product_options_general_product_data', array( __CLASS__, 'add_minimum_donor_amount_field' ) );
 		add_filter( 'product_type_selector', array( __CLASS__, 'register_donor_product_type' ) );
 		add_filter( 'woocommerce_product_class', array( __CLASS__, 'load_donor_product_class' ), 10, 2 );
 		add_filter( 'woocommerce_product_data_tabs', array( __CLASS__, 'donor_product_tabs' ) );
-		add_action( 'woocommerce_product_options_general_product_data', array( __CLASS__, 'add_minimum_donor_amount_field' ) );
 		add_action( 'woocommerce_process_product_meta', array( __CLASS__, 'save_minimum_donor_amount_field' ) );
 	}
 
@@ -179,6 +189,7 @@ class Product_Donor extends WC_Product_Simple {
 		if ( ! $product ) {
 			return '';
 		}
+
 		return $product->get_meta( '_donor_message' );
 	}
 
@@ -208,10 +219,10 @@ class Product_Donor extends WC_Product_Simple {
 			return '';
 		}
 		$array_price = array(
-			$product->get_meta( '_donor_first_price' ),
-			$product->get_meta( '_donor_second_price' ),
-			$product->get_meta( '_donor_third_price' ),
-			$product->get_meta( '_donor_fourth_price' ),
+			'first_price'  => $product->get_meta( '_donor_first_price' ),
+			'second_price' => $product->get_meta( '_donor_second_price' ),
+			'third_price'  => $product->get_meta( '_donor_third_price' ),
+			'fourth_price' => $product->get_meta( '_donor_fourth_price' ),
 		);
 
 		return $array_price;
@@ -224,12 +235,10 @@ class Product_Donor extends WC_Product_Simple {
 	 * @return bool
 	 */
 	public static function is_donor_product( $product ) {
+
 		if ( ! $product ) {
 			return false;
 		}
 		return 'donor' === $product->get_type();
 	}
 }
-
-// Initialize hooks.
-add_action( 'init', array( 'Nvm\Donor\Product_Donor', 'init' ) );
