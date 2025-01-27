@@ -42,6 +42,10 @@ class Product_Donor extends WC_Product_Simple {
 		add_filter( 'woocommerce_product_class', array( __CLASS__, 'load_donor_product_class' ), 10, 2 );
 		add_filter( 'woocommerce_product_data_tabs', array( __CLASS__, 'donor_product_tabs' ) );
 		add_action( 'woocommerce_process_product_meta', array( __CLASS__, 'save_minimum_donor_amount_field' ) );
+
+		// Restrict cart behavior for donor products.
+		add_filter( 'woocommerce_add_to_cart_validation', array( __CLASS__, 'restrict_donor_product_cart' ), 10, 3 );
+		add_action( 'woocommerce_add_cart_item_data', array( __CLASS__, 'ensure_one_donor_product_in_cart' ), 10, 2 );
 	}
 
 	/**
@@ -53,12 +57,25 @@ class Product_Donor extends WC_Product_Simple {
 		return 'donor';
 	}
 
+	/**
+	 * Ensure only one donor product can be in cart at a time.
+	 *
+	 * @return boolean True if cart should be emptied first.
+	 */
+	public function empty_cart_before_add() {
+		return true;
+	}
+
 	public function is_virtual() {
 		return true;
 	}
 
 	public function is_downloadable() {
 		return false;
+	}
+
+	public function is_purchasable() {
+		return true;
 	}
 
 	public static function register_donor_product_type( $types ) {
@@ -79,9 +96,12 @@ class Product_Donor extends WC_Product_Simple {
 	}
 
 	public static function add_minimum_donor_amount_field() {
+		global $post;
+
 		echo '<div class="options_group show_if_donor">';
 
 		echo '<h4>' . 'Επιλογές για τις Δωρεές' . '</h4>';
+		echo '[nvm_donor_form product_id=' . $post->ID . ']';
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_first_price',
@@ -240,5 +260,34 @@ class Product_Donor extends WC_Product_Simple {
 			return false;
 		}
 		return 'donor' === $product->get_type();
+	}
+
+	public static function restrict_donor_product_cart( $passed, $product_id, $quantity ) {
+		$product = wc_get_product( $product_id );
+
+		if ( $product && 'donor' === $product->get_type() ) {
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				$cart_product = $cart_item['data'];
+				if ( $cart_product && 'donor' === $cart_product->get_type() ) {
+					wc_add_notice(
+						__( 'Λυπούμαστε αλλά μόνο μία Δωρεά μπορείτε να έχετε στο καλάθι σας.', 'nevma' ),
+						'error'
+					);
+						return false;
+				}
+			}
+		}
+
+		return $passed;
+	}
+
+	public static function ensure_one_donor_product_in_cart( $cart_item_data, $product_id ) {
+		$product = wc_get_product( $product_id );
+
+		if ( $product && 'donor' === $product->get_type() ) {
+			WC()->cart->empty_cart(); // Empty the cart before adding a donor product.
+		}
+
+		return $cart_item_data;
 	}
 }

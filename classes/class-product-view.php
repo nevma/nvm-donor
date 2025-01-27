@@ -29,9 +29,11 @@ class Product_View {
 
 		// Add Fields to product
 		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'add_donation_fields_to_product' ) );
-		// Add text field to product
+
+		add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'validate_custom_fields_before_add_to_cart' ), 10, 3 );
+
+		// Add field to product
 		add_action( 'woocommerce_product_meta_start', array( $this, 'add_donation_carts' ), 10 );
-		add_action( 'woocommerce_product_meta_start', array( $this, 'add_content_after_addtocart_button' ), 40 );
 
 		// Check out Fields
 		add_filter( 'woocommerce_checkout_fields', array( $this, 'remove_checkout_fields' ) );
@@ -53,27 +55,35 @@ class Product_View {
 		add_action( 'wp_head', array( $this, 'add_donor_checkout_styles' ) );
 
 		// Add shortcode
-		// add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
+		add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
 	}
 
 	/**
 	 * Add donation cart form to product page.
 	 */
-	public function add_donation_carts() {
+	public function add_donation_carts( $product ) {
+
+		if ( ! is_product() ) {
+			$GLOBALS['product'] = $product;
+		}
+
 		global $product;
+
 		do_action( 'woocommerce_before_add_to_cart_form' );
 
 		?>
-		<form class="cart" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data'>
-			<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
+		<div class="donor-box">
+			<form class="cart" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data'>
+				<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
 
-			<button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
+				<button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
 
-			<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
-		</form>
+				<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
+			</form>
 
+			<?php $this->add_content_after_addtocart_button( $product ); ?>
+		</div>
 		<?php
-		do_action( 'woocommerce_after_add_to_cart_form' );
 	}
 
 	/**
@@ -94,7 +104,7 @@ class Product_View {
 	 * sets up the radio options for individual/corporate/memoriam donations,
 	 * and renders the form field.
 	 */
-	public function get_donor_type( $product ) {
+	public function get_donor_type() {
 
 		$chosen = WC()->session->get( 'type_of_donation' );
 		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'type_of_donation' ) : $chosen;
@@ -116,7 +126,9 @@ class Product_View {
 		woocommerce_form_field( 'type_of_donation', $args, $chosen );
 	}
 
-	public function get_donor_prices( $product ) {
+	public function get_donor_prices() {
+
+		global $product;
 
 		$chosen = WC()->session->get( 'nvm_radio_choice' );
 		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
@@ -393,9 +405,7 @@ class Product_View {
 	public function add_to_cart_button_text_single( $text ) {
 		global $product;
 
-		$product_is_donor = $this->product_is_donor( $product );
-
-		if ( ! $product_is_donor ) {
+		if ( ! $this->product_is_donor( $product ) ) {
 			return $text;
 		}
 
@@ -403,12 +413,9 @@ class Product_View {
 	}
 
 	public function add_content_after_addtocart_button() {
-
 		global $product;
 
-		$product_is_donor = $this->product_is_donor( $product );
-
-		if ( ! $product_is_donor ) {
+		if ( ! $this->product_is_donor( $product ) ) {
 			return;
 		}
 
@@ -422,22 +429,18 @@ class Product_View {
 	/**
 	 * Add donation fields to the product page.
 	 */
-	public function add_donation_fields_to_product( $product ) {
+	public function add_donation_fields_to_product() {
 
-		if ( is_product() ) {
-			global $product;
-		}
-		// Target specific product for donations.
-		$product_is_donor = $this->product_is_donor( $product );
+		global $product;
 
-		if ( ! $product_is_donor ) {
+		if ( ! $this->product_is_donor( $product ) ) {
 			return;
 		}
 
 		echo '<div id="first-step" class="step active">';
 
-		$this->get_donor_type( $product );
-		$this->get_donor_prices( $product );
+		$this->get_donor_type();
+		$this->get_donor_prices();
 		echo '<button type="button" class="button steps" onclick="nvm_nextStep()">Επόμενο / Next</button>';
 		echo '</div>';
 
@@ -454,31 +457,6 @@ class Product_View {
 			// Initialize all event listeners on page load
 			document.addEventListener('DOMContentLoaded', function () {
 				nvm_showStep(nvm_currentStep);         // Initialize the first step
-				nvm_toggleFields();                    // Initialize visibility based on the selected donation type
-				nvm_toggleEpistoliFields();            // Initialize visibility based on the epistoli
-				nvm_toggleAnagkeliaFields();           // Initialize visibility Anagkelia
-				nvm_setupDonationAmountHandler();      // Initialize donation amount input behavior
-				nvm_setupDonationTypeHandler();       // Initialize donation type toggle behavior
-
-				// Add event listener to the "Έκδοση Τιμολογίου" checkbox if it exists
-				const invoiceCheckbox = document.getElementById('nvm_timologio');
-				if (invoiceCheckbox) {
-					invoiceCheckbox.addEventListener('change', nvm_toggleInvoiceFields);
-					nvm_toggleInvoiceFields(); // Initialize invoice fields based on the checkbox state
-				}
-
-				const epilostoliCheckbox = document.getElementById('nvm_epistoli');
-				if (epilostoliCheckbox) {
-					epilostoliCheckbox.addEventListener('change', nvm_toggleEpistoliFields);
-					nvm_toggleEpistoliFields(); // Initialize invoice fields based on the checkbox state
-				}
-
-				const anagkeliaCheckbox = document.getElementById('nvm_dead');
-				if (anagkeliaCheckbox) {
-					anagkeliaCheckbox.addEventListener('change', nvm_toggleAnagkeliaFields);
-					nvm_toggleAnagkeliaFields(); // Initialize invoice fields based on the checkbox state
-				}
-
 			});
 
 			/**
@@ -537,172 +515,225 @@ class Product_View {
 				const customAmount = customAmountInput ? customAmountInput.value.trim() : '';
 
 				if (donationChoice === 'custom') {
-					if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 5) {
-						alert('Παρακαλώ προσθέστε ένα ποσό πληρωμής (τουλάχιστον 5€).');
+					if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 1) {
+						alert('Παρακαλώ προσθέστε ένα ποσό πληρωμής (τουλάχιστον 1€).');
 						return false;
 					}
 				}
 				return true;
 			}
 
-			/**
-			 * Toggle visibility of form fields based on the selected donation type
-			 */
-			function nvm_toggleFields() {
-				const donationType = document.querySelector('input[name="type_of_donation"]:checked').value;
+			document.addEventListener('DOMContentLoaded', function () {
+				const addToCartButton = document.querySelector('.single_add_to_cart_button');
 
-				// Group selectors for fields
-				const companyFields = document.querySelectorAll('.company');
-				const memoriamFields = document.querySelectorAll('.memoriam');
-				const commonFields = document.querySelectorAll('.common');
+				if (addToCartButton) {
+					addToCartButton.addEventListener('click', function (e) {
+						const requiredFields = [
+							'nvm_email',
+							'nvm_name',
+							'nvm_surname',
+							'nvm_address',
+							'nvm_town',
+							'nvm_postal',
+							'nvm_telephone'
+						];
 
-				// Hide all optional fields first
-				companyFields.forEach(field => field.style.display = 'none');
-				memoriamFields.forEach(field => field.style.display = 'none');
-				commonFields.forEach(field => field.style.display = 'block'); // Always show common fields
+						let isValid = true;
 
-				// Show relevant fields based on donation type
-				if (donationType === 'corporate') {
-					companyFields.forEach(field => field.style.display = 'block');
-				} else if (donationType === 'memoriam') {
-					memoriamFields.forEach(field => field.style.display = 'block');
-				}
-			}
+						requiredFields.forEach(fieldId => {
+							const field = document.getElementById(fieldId);
+							if (field && field.value.trim() === '') {
+								isValid = false;
+								field.classList.add('error'); // Add error class for styling
+								alert(`Το πεδίο "${field.labels[0].textContent}" είναι υποχρεωτικό.`);
+							} else {
+								field.classList.remove('error'); // Remove error class if valid
+							}
+						});
 
-			/**
-			 * Setup event listeners for donation type radio buttons
-			 */
-			function nvm_setupDonationTypeHandler() {
-				document.querySelectorAll('input[name="type_of_donation"]').forEach(function (radio) {
-					radio.addEventListener('change', nvm_toggleFields);
-				});
-			}
-
-			/**
-			 * Setup behavior for donation amount radio buttons and custom input
-			 */
-			function nvm_setupDonationAmountHandler() {
-				const customAmountRadio = document.getElementById('nvm_radio_choice_custom');
-				const donationAmountInput = document.getElementById('donation_amount');
-				const donationRadios = document.querySelectorAll('input[name="nvm_radio_choice"]');
-
-				// Set the default input value based on the initially checked radio button
-				const selectedRadio = document.querySelector('input[name="nvm_radio_choice"]:checked');
-				if (selectedRadio && selectedRadio.value !== 'custom') {
-					donationAmountInput.value = selectedRadio.value;
-					donationAmountInput.setAttribute('readonly', 'readonly');
-				}
-
-				// Update input value based on the selected donation option
-				donationRadios.forEach(radio => {
-					radio.addEventListener('change', function () {
-						if (customAmountRadio.checked) {
-							donationAmountInput.value = '';
-							donationAmountInput.removeAttribute('readonly');
-							donationAmountInput.focus();
-						} else {
-							donationAmountInput.value = this.value;
-							donationAmountInput.setAttribute('readonly', 'readonly');
+						if (!isValid) {
+							e.preventDefault(); // Prevent form submission if validation fails
 						}
 					});
+				}
+			});
+
+			// toggle choices to show when clicked
+			document.addEventListener('DOMContentLoaded', function () {
+				// Get the checkbox and the company field
+				const timologioCheckbox = document.getElementById('nvm_timologio');
+				const companyField = document.getElementById('nvm_company_field');
+				const companyafm = document.getElementById('nvm_afm_field');
+				const companydoy = document.getElementById('nvm_doy_field');
+
+				// Hide the company field by default
+				companyField.style.display = 'none';
+				companyField.style.display = 'none';
+				companyafm.style.display = 'none';
+				companydoy.style.display = 'none';
+
+				// Add an event listener to the checkbox
+				timologioCheckbox.addEventListener('change', function () {
+					if (this.checked) {
+						// Show the company field when the checkbox is checked
+						companyField.style.display = 'block';
+						companyafm.style.display = 'block';
+						companydoy.style.display = 'block';
+					} else {
+						// Hide the company field when the checkbox is unchecked
+						companyField.style.display = 'none';
+						companyafm.style.display = 'none';
+						companydoy.style.display = 'none';
+					}
 				});
-			}
 
-			/**
-			 * Show or hide invoice fields based on the checkbox state
-			 */
-			function nvm_toggleInvoiceFields() {
-				const invoiceCheckbox = document.getElementById('nvm_timologio');
-				if (!invoiceCheckbox) return; // Exit if checkbox is not found
 
-				// Fields to toggle
-				const relativeField = document.getElementById('nvm_company_field');
-				const afmField = document.getElementById('nvm_afm_field');
-				const douField = document.getElementById('nvm_doy_field');
+				const epistoliCheckbox = document.getElementById('nvm_epistoli');
+				const companyname = document.getElementById('nvm_name_company_field');
+				const companysurname = document.getElementById('nvm_surname_company_field');
+				const companyspace = document.getElementById('nvm_space_company_field');
+				const companyemail = document.getElementById('nvm_email_company_field');
 
-				// Ensure fields exist before trying to change their display
-				if (relativeField && afmField && douField) {
-					const displayStyle = invoiceCheckbox.checked ? 'block' : 'none';
-					relativeField.style.display = displayStyle;
-					afmField.style.display = displayStyle;
-					douField.style.display = displayStyle;
+				// Hide the company field by default
+				companyname.style.display = 'none';
+				companysurname.style.display = 'none';
+				companyspace.style.display = 'none';
+				companyemail.style.display = 'none';
+
+				// Add an event listener to the checkbox
+				epistoliCheckbox.addEventListener('change', function () {
+					if (this.checked) {
+						// Show the company field when the checkbox is checked
+						companyname.style.display = 'block';
+						companysurname.style.display = 'block';
+						companyspace.style.display = 'block';
+						companyemail.style.display = 'block';
+					} else {
+						// Hide the company field when the checkbox is unchecked
+						companyname.style.display = 'none';
+						companysurname.style.display = 'none';
+						companyspace.style.display = 'none';
+						companyemail.style.display = 'none';
+					}
+				});
+
+				const deadCheckbox = document.getElementById('nvm_dead');
+				const userdead = document.getElementById('nvm_dead_relative_field');
+
+				// Hide the company field by default
+				userdead.style.display = 'none';
+
+				// Add an event listener to the checkbox
+				deadCheckbox.addEventListener('change', function () {
+					if (this.checked) {
+						// Show the company field when the checkbox is checked
+						userdead.style.display = 'block';
+
+					} else {
+						// Hide the company field when the checkbox is unchecked
+						userdead.style.display = 'none';
+
+					}
+				});
+			});
+
+			document.addEventListener('DOMContentLoaded', function () {
+				const donorTypeRadios = document.querySelectorAll('input[name="type_of_donation"]');
+				const step2Element = document.getElementById('second-step');
+
+				donorTypeRadios.forEach(radio => {
+					radio.addEventListener('change', function () {
+						updateStep2Class(this.value);
+					});
+				});
+
+				function updateStep2Class(donorType) {
+					// Remove any existing donor-type-related class
+					step2Element.classList.remove('donor-individual', 'donor-corporate', 'donor-memoriam');
+
+					// Add the new class based on the selected donor type
+					const newClass = `donor-${donorType}`;
+					step2Element.classList.add(newClass);
 				}
-			}
 
-			/**
-			 * Show or hide invoice fields based on the checkbox state
-			 */
-			function nvm_toggleEpistoliFields() {
-				const invoiceCheckbox = document.getElementById('nvm_epistoli');
-				if (!invoiceCheckbox) return; // Exit if checkbox is not found
-
-				// Fields to toggle
-				const companyField = document.getElementById('nvm_name_company_field');
-				const surnameField = document.getElementById('nvm_surname_company_field');
-				const spaceField = document.getElementById('nvm_space_company_field');
-				const emailField = document.getElementById('nvm_email_company_field');
-
-				// Ensure fields exist before trying to change their display
-				if (companyField && surnameField && spaceField && emailField ) {
-					const displayStyle = invoiceCheckbox.checked ? 'block' : 'none';
-					companyField.style.display = displayStyle;
-					surnameField.style.display = displayStyle;
-					spaceField.style.display = displayStyle;
-					emailField.style.display = displayStyle;
+				// Initialize the class based on the default selection
+				const defaultDonorType = document.querySelector('input[name="type_of_donation"]:checked');
+				if (defaultDonorType) {
+					updateStep2Class(defaultDonorType.value);
 				}
-			}
+			});
 
-			/**
-			 * Show or hide invoice fields based on the checkbox state
-			 */
-			function nvm_toggleAnagkeliaFields() {
-				const anagkeliaCheckbox = document.getElementById('nvm_dead');
-				if (!anagkeliaCheckbox) return;
 
-				const relativeField = document.getElementById('nvm_dead_relative_field');
-				const messageField = document.getElementById('nvm_dead_message_field');
-
-				if (relativeField && messageField) {
-					const displayStyle = anagkeliaCheckbox.checked ? 'block' : 'none';
-					relativeField.style.display = displayStyle;
-					messageField.style.display = displayStyle;
-				}
-			}
 		</script>
-
 		<style>
-			input {
+
+			.donor-box #nvm_epistoli_field,
+			.donor-box #nvm_dead_field,
+			.donor-box #nvm_timologio_field,
+			.donor-box #nvm_dead_name_field{
+				display:none;
+			}
+
+			.donor-box .donor-corporate #nvm_timologio_field,
+			.donor-box .donor-memoriam #nvm_dead_name_field{
+				display:block;
+			}
+
+			.donor-box .donor-memoriam #nvm_epistoli_field{
+				display:block;
+			}
+
+			.donor-box input[type="radio"] + label::after,
+			.donor-box input[type="radio"] + label::before{
+				display: none!important;
+			}
+
+			.donor-box input {
 				background-color: #f5eeee;
 			}
 
-			#second-step-back{
+			.donor-box #second-step input[type="checkbox"] {
+				display: inline-block!important;
+			}
+
+			.donor-box #second-step-back{
 				font-size: 14px;
 				background: transparent;
 				border: 0px;
 				color: gray;
 				padding-bottom: 15px;
+				border: 0px solid transparent;
+				padding: 0px;
+				line-height: 1em;
+				box-shadow: none;
+				color:var(--color-pink-light);
+			}
+			.donor-box #second-step-back::hover{
+				color:var(--color-pink-light);
+				text-decoration: underline;
 			}
 
-			.wp-block-woocommerce-add-to-cart-form .variations_button, .wp-block-woocommerce-add-to-cart-form form.cart {
+			.donor-box .wp-block-woocommerce-add-to-cart-form .variations_button, .wp-block-woocommerce-add-to-cart-form form.cart {
 				display: block;
 			}
 			.wp-block-woocommerce-product-price,
 			.wp-block-post-title,
-			.wp-block-woocommerce-product-meta,
-			.woocommerce-tabs.wc-tabs-wrapper{
+			.donor-box .wp-block-woocommerce-product-meta,
+			.donor-box .woocommerce-tabs.wc-tabs-wrapper{
 				display: none;
 			}
 
-			.woocommerce div.product form.cart div.quantity{
+			.donor-box .woocommerce div.product form.cart div.quantity{
 				display: none;
 			}
-			.safe {
+			.donor-box .safe {
 				font-size:14px;
 			}
-			#donation_amount{
+			.donor-box #donation_amount{
 				text-align: center;
 			}
-			.button.steps, .single_add_to_cart_button.button{
+			.donor-box .button.steps,
+			.donor-box .single_add_to_cart_button.button{
 				background-color: #eb008b;
 				border-radius: 40px;
 				color: #fff;
@@ -721,46 +752,46 @@ class Product_View {
 				text-decoration: none;
 				width: 100%;
 			}
-			.single_add_to_cart_button.button{
+			.donor-box .single_add_to_cart_button.button{
 				grid-column: span;
 			}
 
-			.button.steps:hover, .single_add_to_cart_button.button:hover{
+			.donor-box .button.steps:hover, .single_add_to_cart_button.button:hover{
 				background-color: #fff;
 				color: #eb008b;
 			}
 
-			form.cart,
-			.safe {
+			.donor-box form.cart,
+			.donor-box .safe {
 				max-width: 450px;
 			}
-			.safe {
+			.donor-box .safe {
 				display:block;
 			}
-			.step{
+			.donor-box .step{
 				display:none;
 			}
 
-			.step.active{
+			.donor-box .step.active{
 				display:block;
 			}
-			#donation_amount_field label{
+			.donor-box #donation_amount_field label{
 				text-align:center;
 				display: block;
 			}
 
-			.woocommerce form .form-row label,
-			.woocommerce-page form .form-row label {
+			.donor-box .woocommerce form .form-row label,
+			.donor-box .woocommerce-page form .form-row label {
 				display: inline-block;
 			}
 
-			#type_of_donation_field > span{
+			.donor-box #type_of_donation_field > span{
 				display: grid;
 				grid-template-columns: repeat(3, 1fr); /* Δημιουργεί 3 ίσες στήλες */
 				gap: 0px;
 
 			}
-			#type_of_donation_field label{
+			.donor-box #type_of_donation_field label{
 				background-color: #fff;
 				color: #eb008b;
 				padding: 6px 20px;
@@ -768,31 +799,31 @@ class Product_View {
 				box-shadow: 0 0 0 2px #eb008b;
 				text-align: center;
 			}
-			#type_of_donation_field input[type=radio]:checked+label {
+			.donor-box #type_of_donation_field input[type=radio]:checked+label {
 				background-color: #eb008b;
 				color: #fff;
 			}
 
-			#type_of_donation_field input,
-			#nvm_radio_choice_field input{
+			.donor-box #type_of_donation_field input,
+			.donor-box #nvm_radio_choice_field input{
 				visibility:hidden;
 				position: absolute;
 				top: 0px;
 
 			}
 
-			#nvm_radio_choice_field > span{
+			.donor-box #nvm_radio_choice_field > span{
 				display: grid;
 				grid-template-columns: repeat(4, 1fr);
 				grid-template-rows: auto auto;
 				gap: 0px;
 			}
 
-			#nvm_radio_choice_field label:last-child {
-				grid-column: 1 / -1; /* εκτείνεται σε όλες τις στήλες */
+			.donor-box #nvm_radio_choice_field label:last-child {
+				grid-column: 1 / -1; /* εκτείνεται σε όλες ��ις στήλες */
 			}
 
-			#nvm_radio_choice_field label{
+			.donor-box #nvm_radio_choice_field label{
 				background-color: #fff;
 				color: #023f88;
 				padding: 6px 20px;
@@ -801,16 +832,44 @@ class Product_View {
 				text-align: center;
 			}
 
-			#nvm_radio_choice_field input[type=radio]:checked+label {
+			.donor-box #nvm_radio_choice_field input[type=radio]:checked+label {
 				background-color: #023f88;
 				color: #fff;
 			}
-			.optional{
+			.donor-box .optional{
 				display:none;
 			}
 
 		</style>
 		<?php
+	}
+
+	function validate_custom_fields_before_add_to_cart( $passed, $product_id, $quantity ) {
+		// Check if product is donor type
+		$product = wc_get_product( $product_id );
+		if ( ! $product || ! $product->is_type( 'donor' ) ) {
+			return $passed;
+		}
+
+		$required_fields = array(
+			'nvm_email'     => 'email',
+			'nvm_name'      => 'Όνομα',
+			'nvm_surname'   => 'Επίθετο',
+			'nvm_address'   => 'Διεύθυνση',
+			'nvm_town'      => 'Πόλη',
+			'nvm_postal'    => 'Ταχυδρομικός Κώδικας',
+			'nvm_telephone' => 'Τηλέφωνο',
+
+		);
+
+		foreach ( $required_fields as $field => $error ) {
+			if ( empty( $_POST[ $field ] ) ) {
+				wc_add_notice( sprintf( __( 'Το πεδίο "%s" είναι υποχρεωτικό.', 'nevma' ), $error ), 'error' );
+				$passed = false;
+			}
+		}
+
+		return $passed;
 	}
 
 	/**
@@ -821,12 +880,31 @@ class Product_View {
 	 */
 	public function save_donation_data( $cart_item_data, $product_id ) {
 
-		if ( ! isset( $_POST['donation_form_nonce_field'] ) || ! wp_verify_nonce( $_POST['donation_form_nonce_field'], 'donation_form_nonce' ) ) {
-			wp_die();
+		if ( isset( $_POST['donation_form_nonce_field'] ) && ! wp_verify_nonce( $_POST['donation_form_nonce_field'], 'donation_form_nonce' ) ) {
+			wc_add_notice( __( 'Η επαλήθευση του nonce απέτυχε. Παρακαλώ δοκιμάστε ξανά.', 'nevma' ), 'error' );
+			return $cart_item_data;
+		}
+
+		if ( ! isset( $_POST['type_of_donation'] ) ) {
+			return $cart_item_data;
 		}
 
 		if ( isset( $_POST['type_of_donation'] ) ) {
+
 			$cart_item_data['type_of_donation'] = $_POST['type_of_donation'];
+
+			// Validate required fields.
+			$required_fields = array(
+				'nvm_email'   => __( 'Email is required.', 'nevma' ),
+				'nvm_name'    => __( 'Name is required.', 'nevma' ),
+				'nvm_surname' => __( 'Surname is required.', 'nevma' ),
+			);
+
+			foreach ( $required_fields as $field => $error_message ) {
+				if ( ! isset( $_POST[ $field ] ) || empty( $_POST[ $field ] ) ) {
+					return $cart_item_data;
+				}
+			}
 		}
 
 		if ( isset( $_POST['nvm_epistoli'] ) ) {
@@ -944,7 +1022,7 @@ class Product_View {
 			'user_telephone'    => __( 'Τηλέφωνο Δωρηρή', 'nevma' ),
 			'dead_name'         => __( 'Όνομα Αποθανόντος', 'nevma' ),
 			'dead_relative'     => __( 'Συγγένεια Αποθανόντος', 'nevma' ),
-			'dead_message'      => __( 'Μήνυμα Αποθανόντος', 'nevma' ),
+			'dead_message'      => __( 'Μήνυμα Αποθα��όντος', 'nevma' ),
 			'timologio_company' => __( 'Εταιρεία Τιμολογίου', 'nevma' ),
 			'timologio_afm'     => __( 'ΑΦΜ Τιμολογίου', 'nevma' ),
 			'timologio_doy'     => __( 'ΔΟΥ Τιμολογίου', 'nevma' ),
@@ -1111,8 +1189,7 @@ class Product_View {
 
 		// Capture the output of the donation form.
 		ob_start();
-
-		$this->add_donation_carts();
+		echo $this->add_donation_carts( $product );
 		// Add the add to cart button
 		return ob_get_clean();
 	}
@@ -1127,6 +1204,9 @@ class Product_View {
 			.has-donor-product .col-2,
 			.has-donor-product #order_review_heading {
 				display: none;
+			}
+			.woocommerce-checkout-review-order-table th{
+				dislay:none;
 			}
 		</style>
 		<?php
