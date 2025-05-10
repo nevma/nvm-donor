@@ -46,6 +46,10 @@ class Product_Donor extends WC_Product_Simple {
 		// Restrict cart behavior for donor products.
 		add_filter( 'woocommerce_add_to_cart_validation', array( __CLASS__, 'restrict_donor_product_cart' ), 10, 3 );
 		add_action( 'woocommerce_add_cart_item_data', array( __CLASS__, 'ensure_one_donor_product_in_cart' ), 10, 2 );
+
+		// emails
+		add_action( 'woocommerce_email_order_meta', array( __CLASS__, 'add_donor_message_to_email' ), 20, 4 );
+		add_action( 'woocommerce_email', array( __CLASS__, 'custom_email_content' ), 10 );
 	}
 
 	/**
@@ -289,5 +293,63 @@ class Product_Donor extends WC_Product_Simple {
 		}
 
 		return $cart_item_data;
+	}
+
+	public static function add_donor_message_to_email( $order, $sent_to_admin, $plain_text, $email ) {
+		$items = $order->get_items();
+
+		$donor_message = '
+		<h2>Ευχαριστούμε πολύ που υποστηρίζετε το έργο του Πανελληνίου Συλλόγου Γυναικών με Καρκίνο Μαστού «Άλμα Ζωής» .<h2>
+		<p>Θα θέλαμε να γνωρίζετε πως μέσα από τη δωρεά σας μας βοηθάτε να υλοποιούμε:
+		<ul>
+			<li>προγράμματα ενημέρωσης και προαγωγής της πρόληψης και της έγκαιρης διάγνωσης</li>
+			<li>προγράμματα υποστήριξης και ενδυνάμωσης για γυναίκες που έχουν βιώσει καρκίνο του μαστού</li>
+			<li>και προγράμματα διεκδίκησης των δικαιωμάτων των ασθενών.</li>
+		</ul>
+		</p>
+
+		<h3>Όραμά μας ένας κόσμος χωρίς θανάτους από καρκίνο του μαστού.</h3>
+		<p>Ευχαριστούμε που είστε μαζί μας για να το πραγματοποιήσουμε.<p>
+	';
+
+		foreach ( $items as $item ) {
+			$product_id = $item->get_product_id();
+			$product    = wc_get_product( $product_id );
+
+			if ( self::is_donor_product( $product ) ) {
+				remove_action( 'woocommerce_email_customer_details', 10 );
+					// Remove the product table
+				remove_action( 'woocommerce_email_order_details', 10 );
+
+				remove_action( 'woocommerce_email_customer_details', 10 );
+				echo $donor_message;
+				break;
+			}
+		}
+	}
+
+	public static function custom_email_content( $order ) {
+		error_log( '$order:' );
+		error_log( print_r( $order, true ) );
+
+		return;
+
+		$items = $order->get_items();
+
+		foreach ( $items as $item ) {
+			$product_id = $item->get_product_id();
+			$product    = wc_get_product( $product_id );
+
+			if ( self::is_donor_product( $product ) ) {
+				if ( ! $sent_to_admin ) {
+					remove_action( 'woocommerce_email_customer_details', 10 );
+					// Remove the product table
+					remove_action( 'woocommerce_email_order_details', 10 );
+
+					remove_action( 'woocommerce_email_customer_details', 10 );
+				}
+				break;
+			}
+		}
 	}
 }
