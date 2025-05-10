@@ -274,7 +274,7 @@ class Product_Donor extends WC_Product_Simple {
 				$cart_product = $cart_item['data'];
 				if ( $cart_product && 'donor' === $cart_product->get_type() ) {
 					wc_add_notice(
-						__( 'Λυπούμαστε αλλά μόνο μία Δωρεά μπορείτε να έχετε στο καλάθι σας.', 'nevma' ),
+						__( 'Λυπούμαστε αλλά μόνο μία Δωρεά μπορείτε να έχετε στο καλάθι σας. Δείτε το καλάθι σας <a href="' . wc_get_cart_url() . '">εδώ</a>.', 'nevma' ),
 						'error'
 					);
 						return false;
