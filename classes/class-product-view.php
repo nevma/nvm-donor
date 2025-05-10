@@ -240,7 +240,9 @@ class Product_View {
 			)
 		);
 
-		echo '<h4>' . __( 'Στοιχεία Δωρητή', 'nevma' ) . '</h4>';
+		echo '<h4 class="donor-simple-title">' . __( 'Στοιχεία Δωρητή', 'nevma' ) . '</h4>';
+		echo '<h4 class="donor-company-title">' . __( 'Στοιχεία εκπροσώπου εταιρείας', 'nevma' ) . '</h4>';
+
 		woocommerce_form_field(
 			'nvm_email',
 			array(
@@ -575,6 +577,7 @@ class Product_View {
 				const companyField = document.getElementById('nvm_company_field');
 				const companyafm = document.getElementById('nvm_afm_field');
 				const companydoy = document.getElementById('nvm_doy_field');
+				const companyaddress = document.getElementById('nvm_address_company_field');
 
 				// Hide the company field by default
 				companyField.style.display = 'none';
@@ -589,11 +592,13 @@ class Product_View {
 						companyField.style.display = 'block';
 						companyafm.style.display = 'block';
 						companydoy.style.display = 'block';
+						companyaddress.style.display = 'block';
 					} else {
 						// Hide the company field when the checkbox is unchecked
 						companyField.style.display = 'none';
 						companyafm.style.display = 'none';
 						companydoy.style.display = 'none';
+						companyaddress.style.display = 'none';
 					}
 				});
 
