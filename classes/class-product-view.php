@@ -190,56 +190,6 @@ class Product_View {
 
 		echo '<div class="donation-fields">';
 
-		woocommerce_form_field(
-			'nvm_epistoli',
-			array(
-				'type'     => 'checkbox',
-				'label'    => __( 'Επιθυμείτε ευχαριστήρια επιστολή', 'nevma' ),
-				'required' => false,
-				'class'    => array( 'form-row-wide', 'company' ),
-			)
-		);
-
-		woocommerce_form_field(
-			'nvm_name_company',
-			array(
-				'type'     => 'text',
-				'label'    => __( 'Όνομα', 'nevma' ),
-				'required' => false,
-				'class'    => array( 'form-row-first', 'epistoli' ),
-			)
-		);
-
-		woocommerce_form_field(
-			'nvm_surname_company',
-			array(
-				'type'     => 'text',
-				'label'    => __( 'Επίθετο', 'nevma' ),
-				'required' => false,
-				'class'    => array( 'form-row-last', 'epistoli' ),
-			)
-		);
-
-		woocommerce_form_field(
-			'nvm_space_company',
-			array(
-				'type'     => 'text',
-				'label'    => __( 'Τίτλος', 'nevma' ),
-				'required' => false,
-				'class'    => array( 'form-row-wide', 'epistoli' ),
-			)
-		);
-
-		woocommerce_form_field(
-			'nvm_email_company',
-			array(
-				'type'     => 'email',
-				'label'    => __( 'email', 'nevma' ),
-				'required' => false,
-				'class'    => array( 'form-row-wide', 'epistoli' ),
-			)
-		);
-
 		echo '<h4>' . __( 'Στοιχεία Δωρητή', 'nevma' ) . '</h4>';
 		woocommerce_form_field(
 			'nvm_email',
@@ -352,6 +302,56 @@ class Product_View {
 		);
 
 		woocommerce_form_field(
+			'nvm_epistoli',
+			array(
+				'type'     => 'checkbox',
+				'label'    => __( 'Επιθυμείτε ευχαριστήρια επιστολή', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'company' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_name_company',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Όνομα', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-first', 'epistoli' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_surname_company',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Επίθετο', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-last', 'epistoli' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_space_company',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Τίτλος', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'epistoli' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_email_company',
+			array(
+				'type'     => 'email',
+				'label'    => __( 'email', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'epistoli' ),
+			)
+		);
+
+		woocommerce_form_field(
 			'nvm_timologio',
 			array(
 				'type'     => 'checkbox',
@@ -388,6 +388,16 @@ class Product_View {
 				'label'    => __( 'ΔΟΥ', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-last', 'timologio' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_address_company',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Διεύθυνση Εδρας', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'timologio' ),
 			)
 		);
 
