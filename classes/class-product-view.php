@@ -685,7 +685,16 @@ class Product_View {
 			.donor-box #nvm_epistoli_field,
 			.donor-box #nvm_dead_field,
 			.donor-box #nvm_timologio_field,
-			.donor-box #nvm_dead_name_field{
+			.donor-box #nvm_dead_name_field,
+			.donor-company-title{
+				display:none;
+			}
+
+			.donor-box .donor-corporate .donor-company-title{
+				display:block;
+			}
+
+			.donor-box .donor-corporate .donor-simple-title{
 				display:none;
 			}
 
@@ -879,7 +888,7 @@ class Product_View {
 
 		foreach ( $required_fields as $field => $error ) {
 			if ( empty( $_POST[ $field ] ) ) {
-				wc_add_notice( sprintf( __( 'Το πεδίο "%s" είναι υποχρεωτικό.', 'nevma' ), $error ), 'error' );
+				wc_add_notice( sprintf( __( 'Το πεδίο "%s" είναι υποχρεωτι��ό.', 'nevma' ), $error ), 'error' );
 				$passed = false;
 			}
 		}
