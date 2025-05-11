@@ -719,7 +719,8 @@ class Product_View {
 			.donor-box #nvm_epistoli_field,
 			.donor-box #nvm_dead_field,
 			.donor-box #nvm_dead_name_field,
-			.donor-company-title{
+			.donor-company-title,
+			.donor-memoriam-title,{
 				display:none;
 			}
 
