@@ -190,18 +190,19 @@ class Product_View {
 
 		echo '<div class="donation-fields">';
 
-		woocommerce_form_field(
-			'nvm_timologio',
-			array(
-				'type'     => 'checkbox',
-				'label'    => __( 'Έκδοση τιμολογίου', 'nevma' ),
-				'required' => false,
-				'class'    => array( 'form-row-wide', 'company', 'memoriam' ),
-			)
-		);
+		// woocommerce_form_field(
+		// 'nvm_timologio',
+		// array(
+		// 'type'     => 'checkbox',
+		// 'label'    => __( 'Έκδοση τιμολογίου', 'nevma' ),
+		// 'required' => false,
+		// 'class'    => array( 'form-row-wide', 'company', 'memoriam' ),
+		// )
+		// );
 
+		echo '<h4 class="donor-company-title">' . __( 'Στοιχεία Eταιρείας', 'nevma' ) . '</h4>';
 		woocommerce_form_field(
-			'nvm_company',
+			'nvm_company_name',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Επωνυμία εταιρίας', 'nevma' ),
@@ -211,7 +212,7 @@ class Product_View {
 		);
 
 		woocommerce_form_field(
-			'nvm_afm',
+			'nvm_company_afm',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'ΑΦΜ', 'nevma' ),
@@ -221,7 +222,7 @@ class Product_View {
 		);
 
 		woocommerce_form_field(
-			'nvm_doy',
+			'nvm_company_doy',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'ΔΟΥ', 'nevma' ),
@@ -231,7 +232,7 @@ class Product_View {
 		);
 
 		woocommerce_form_field(
-			'nvm_address_company',
+			'nvm_company_address',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Διεύθυνση Εδρας', 'nevma' ),
@@ -573,34 +574,34 @@ class Product_View {
 			// toggle choices to show when clicked
 			document.addEventListener('DOMContentLoaded', function () {
 				// Get the checkbox and the company field
-				const timologioCheckbox = document.getElementById('nvm_timologio');
-				const companyField = document.getElementById('nvm_company_field');
-				const companyafm = document.getElementById('nvm_afm_field');
-				const companydoy = document.getElementById('nvm_doy_field');
-				const companyaddress = document.getElementById('nvm_address_company_field');
+				// const timologioCheckbox = document.getElementById('nvm_timologio');
+				// const companyField = document.getElementById('nvm_company_field');
+				// const companyafm = document.getElementById('nvm_afm_field');
+				// const companydoy = document.getElementById('nvm_doy_field');
+				// const companyaddress = document.getElementById('nvm_address_company_field');
 
-				// Hide the company field by default
-				companyField.style.display = 'none';
-				companyField.style.display = 'none';
-				companyafm.style.display = 'none';
-				companydoy.style.display = 'none';
+				// // Hide the company field by default
+				// companyField.style.display = 'none';
+				// companyField.style.display = 'none';
+				// companyafm.style.display = 'none';
+				// companydoy.style.display = 'none';
 
-				// Add an event listener to the checkbox
-				timologioCheckbox.addEventListener('change', function () {
-					if (this.checked) {
-						// Show the company field when the checkbox is checked
-						companyField.style.display = 'block';
-						companyafm.style.display = 'block';
-						companydoy.style.display = 'block';
-						companyaddress.style.display = 'block';
-					} else {
-						// Hide the company field when the checkbox is unchecked
-						companyField.style.display = 'none';
-						companyafm.style.display = 'none';
-						companydoy.style.display = 'none';
-						companyaddress.style.display = 'none';
-					}
-				});
+				// // Add an event listener to the checkbox
+				// timologioCheckbox.addEventListener('change', function () {
+				// 	if (this.checked) {
+				// 		// Show the company field when the checkbox is checked
+				// 		companyField.style.display = 'block';
+				// 		companyafm.style.display = 'block';
+				// 		companydoy.style.display = 'block';
+				// 		companyaddress.style.display = 'block';
+				// 	} else {
+				// 		// Hide the company field when the checkbox is unchecked
+				// 		companyField.style.display = 'none';
+				// 		companyafm.style.display = 'none';
+				// 		companydoy.style.display = 'none';
+				// 		companyaddress.style.display = 'none';
+				// 	}
+				// });
 
 
 				const epistoliCheckbox = document.getElementById('nvm_epistoli');
@@ -682,19 +683,29 @@ class Product_View {
 		</script>
 		<style>
 
-			.donor-box #nvm_epistoli_field,
+			/* .donor-box #nvm_epistoli_field,
 			.donor-box #nvm_dead_field,
 			.donor-box #nvm_timologio_field,
 			.donor-box #nvm_dead_name_field,
+			.donor-box #nvm_timologio_field, */
 			.donor-company-title{
 				display:none;
 			}
 
-			.donor-box .donor-corporate .donor-company-title{
+			.donor-box .donor-corporate .donor-company-title,
+			.donor-box .donor-corporate #nvm_company_field,
+			.donor-box .donor-corporate #nvm_afm_field,
+			.donor-box .donor-corporate #nvm_doy_field,
+			.donor-box .donor-corporate #nvm_address_company_field{
 				display:block;
 			}
 
-			.donor-box .donor-corporate .donor-simple-title{
+			.donor-box .donor-corporate .donor-simple-title,
+			.donor-box .donor-corporate #nvm_timologio_field{
+				display:none;
+			}
+
+			.donor-box .donor-corporate #nvm_timologio_field{
 				display:none;
 			}
 
