@@ -190,17 +190,8 @@ class Product_View {
 
 		echo '<div class="donation-fields">';
 
-		// woocommerce_form_field(
-		// 'nvm_timologio',
-		// array(
-		// 'type'     => 'checkbox',
-		// 'label'    => __( 'Έκδοση τιμολογίου', 'nevma' ),
-		// 'required' => false,
-		// 'class'    => array( 'form-row-wide', 'company', 'memoriam' ),
-		// )
-		// );
-
 		echo '<h4 class="donor-company-title">' . __( 'Στοιχεία Eταιρείας', 'nevma' ) . '</h4>';
+
 		woocommerce_form_field(
 			'nvm_company_name',
 			array(
@@ -358,7 +349,7 @@ class Product_View {
 			'nvm_epistoli',
 			array(
 				'type'     => 'checkbox',
-				'label'    => __( 'Επιθυμείτε ευχαριστήρια επιστολή', 'nevma' ),
+				'label'    => __( 'Επιθυμείτε αναγγελία σε συγγενή;', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'company' ),
 			)
@@ -368,7 +359,7 @@ class Product_View {
 			'nvm_name_company',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Όνομα', 'nevma' ),
+				'label'    => __( 'Όνομα συγγενούς', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-first', 'epistoli' ),
 			)
@@ -378,19 +369,9 @@ class Product_View {
 			'nvm_surname_company',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Επίθετο', 'nevma' ),
+				'label'    => __( 'Επίθετο συγγενούς', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-last', 'epistoli' ),
-			)
-		);
-
-		woocommerce_form_field(
-			'nvm_space_company',
-			array(
-				'type'     => 'text',
-				'label'    => __( 'Τίτλος', 'nevma' ),
-				'required' => false,
-				'class'    => array( 'form-row-wide', 'epistoli' ),
 			)
 		);
 
@@ -398,9 +379,59 @@ class Product_View {
 			'nvm_email_company',
 			array(
 				'type'     => 'email',
-				'label'    => __( 'email', 'nevma' ),
+				'label'    => __( 'email συγγενούς', 'nevma' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'epistoli' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_memoriam_invoice',
+			array(
+				'type'     => 'checkbox',
+				'label'    => __( 'Η δωρεά ΕΙΣ ΜΝΗΜΗ γινεται εκ μέρους εταιρείας;', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_memoriam_invoice_name',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Επωνυμία εταιρίας', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_memoriam_invoice_afm',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'ΑΦΜ', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-first', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_memoriam_invoice_doy',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'ΔΟΥ', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-last', 'memoriam' ),
+			)
+		);
+
+		woocommerce_form_field(
+			'nvm_memoriam_invoice_address',
+			array(
+				'type'     => 'text',
+				'label'    => __( 'Διεύθυνση Εδρας', 'nevma' ),
+				'required' => false,
+				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
 		);
 
@@ -573,47 +604,47 @@ class Product_View {
 
 			// toggle choices to show when clicked
 			document.addEventListener('DOMContentLoaded', function () {
-				// Get the checkbox and the company field
-				// const timologioCheckbox = document.getElementById('nvm_timologio');
-				// const companyField = document.getElementById('nvm_company_field');
-				// const companyafm = document.getElementById('nvm_afm_field');
-				// const companydoy = document.getElementById('nvm_doy_field');
-				// const companyaddress = document.getElementById('nvm_address_company_field');
+				//Get the checkbox and the company field
+				const timologioCheckbox = document.getElementById('nvm_memoriam_invoice');
+				const companyField = document.getElementById('nvm_memoriam_invoice_field');
+				const companyafm = document.getElementById('nvm_memoriam_invoice_afm_field');
+				const companydoy = document.getElementById('nvm_memoriam_invoice_doy_field');
+				const companyaddress = document.getElementById('nvm_memoriam_invoice_address_field');
 
-				// // Hide the company field by default
-				// companyField.style.display = 'none';
-				// companyField.style.display = 'none';
-				// companyafm.style.display = 'none';
-				// companydoy.style.display = 'none';
+				// Hide the company field by default
+				companyField.style.display = 'none';
+				companyField.style.display = 'none';
+				companyafm.style.display = 'none';
+				companydoy.style.display = 'none';
 
-				// // Add an event listener to the checkbox
-				// timologioCheckbox.addEventListener('change', function () {
-				// 	if (this.checked) {
-				// 		// Show the company field when the checkbox is checked
-				// 		companyField.style.display = 'block';
-				// 		companyafm.style.display = 'block';
-				// 		companydoy.style.display = 'block';
-				// 		companyaddress.style.display = 'block';
-				// 	} else {
-				// 		// Hide the company field when the checkbox is unchecked
-				// 		companyField.style.display = 'none';
-				// 		companyafm.style.display = 'none';
-				// 		companydoy.style.display = 'none';
-				// 		companyaddress.style.display = 'none';
-				// 	}
-				// });
+				// Add an event listener to the checkbox
+				timologioCheckbox.addEventListener('change', function () {
+					if (this.checked) {
+						// Show the company field when the checkbox is checked
+						companyField.style.display = 'block';
+						companyafm.style.display = 'block';
+						companydoy.style.display = 'block';
+						companyaddress.style.display = 'block';
+					} else {
+						// Hide the company field when the checkbox is unchecked
+						companyField.style.display = 'none';
+						companyafm.style.display = 'none';
+						companydoy.style.display = 'none';
+						companyaddress.style.display = 'none';
+					}
+				});
 
 
 				const epistoliCheckbox = document.getElementById('nvm_epistoli');
 				const companyname = document.getElementById('nvm_name_company_field');
 				const companysurname = document.getElementById('nvm_surname_company_field');
-				const companyspace = document.getElementById('nvm_space_company_field');
+				//const companyspace = document.getElementById('nvm_space_company_field');
 				const companyemail = document.getElementById('nvm_email_company_field');
 
 				// Hide the company field by default
 				companyname.style.display = 'none';
 				companysurname.style.display = 'none';
-				companyspace.style.display = 'none';
+				//companyspace.style.display = 'none';
 				companyemail.style.display = 'none';
 
 				// Add an event listener to the checkbox
@@ -622,13 +653,13 @@ class Product_View {
 						// Show the company field when the checkbox is checked
 						companyname.style.display = 'block';
 						companysurname.style.display = 'block';
-						companyspace.style.display = 'block';
+						//companyspace.style.display = 'block';
 						companyemail.style.display = 'block';
 					} else {
 						// Hide the company field when the checkbox is unchecked
 						companyname.style.display = 'none';
 						companysurname.style.display = 'none';
-						companyspace.style.display = 'none';
+						//companyspace.style.display = 'none';
 						companyemail.style.display = 'none';
 					}
 				});
@@ -683,37 +714,50 @@ class Product_View {
 		</script>
 		<style>
 
-			/* .donor-box #nvm_epistoli_field,
+			/* Reset all fields */
+			.donor-box #nvm_epistoli_field,
 			.donor-box #nvm_dead_field,
-			.donor-box #nvm_timologio_field,
 			.donor-box #nvm_dead_name_field,
-			.donor-box #nvm_timologio_field, */
 			.donor-company-title{
 				display:none;
 			}
 
+			.donor-box #nvm_memoriam_invoice_field,
+			.donor-box #nvm_memoriam_invoice_name_field,
+			.donor-box #nvm_memoriam_invoice_afm_field,
+			.donor-box #nvm_memoriam_invoice_doy_field,
+			.donor-box #nvm_memoriam_invoice_address_field{
+				display:none;
+			}
+
+			.donor-box .donor-company-title,
+			.donor-box #nvm_company_field,
+			.donor-box #nvm_company_afm_field,
+			.donor-box #nvm_company_doy_field,
+			.donor-box #nvm_company_name_field,
+			.donor-box #nvm_company_address_field{
+				display:none;
+			}
+
+			/* Show fields for corporate donor */
 			.donor-box .donor-corporate .donor-company-title,
 			.donor-box .donor-corporate #nvm_company_field,
-			.donor-box .donor-corporate #nvm_afm_field,
-			.donor-box .donor-corporate #nvm_doy_field,
-			.donor-box .donor-corporate #nvm_address_company_field{
+			.donor-box .donor-corporate #nvm_company_afm_field,
+			.donor-box .donor-corporate #nvm_company_doy_field,
+			.donor-box .donor-corporate #nvm_company_name_field,
+			.donor-box .donor-corporate #nvm_company_address_field{
 				display:block;
 			}
 
+			/* Hide fields for Corporate donor */
 			.donor-box .donor-corporate .donor-simple-title,
 			.donor-box .donor-corporate #nvm_timologio_field{
 				display:none;
 			}
 
-			.donor-box .donor-corporate #nvm_timologio_field{
-				display:none;
-			}
-
-			.donor-box .donor-corporate #nvm_timologio_field,
-			.donor-box .donor-memoriam #nvm_dead_name_field{
-				display:block;
-			}
-
+			/* Show fields for memoriam donor */
+			.donor-box .donor-memoriam #nvm_memoriam_invoice_field,
+			.donor-box .donor-memoriam #nvm_dead_name_field,
 			.donor-box .donor-memoriam #nvm_epistoli_field{
 				display:block;
 			}
@@ -822,7 +866,7 @@ class Product_View {
 
 			.donor-box #type_of_donation_field > span{
 				display: grid;
-				grid-template-columns: repeat(3, 1fr); /* Δημιουργεί 3 ίσες στήλες */
+				grid-template-columns: repeat(3, 1fr); /* Δημιουργεί 3 ίσες ��τήλες */
 				gap: 0px;
 
 			}
@@ -943,10 +987,10 @@ class Product_View {
 		}
 
 		if ( isset( $_POST['nvm_epistoli'] ) ) {
-			$cart_item_data['epistoli_name']     = $_POST['nvm_name_company'];
-			$cart_item_data['epistoli_surname']  = $_POST['nvm_surname_company'];
-			$cart_item_data['epistoli_position'] = $_POST['nvm_space_company'];
-			$cart_item_data['epistoli_email']    = $_POST['nvm_email_company'];
+			$cart_item_data['epistoli_name']    = $_POST['nvm_name_company'];
+			$cart_item_data['epistoli_surname'] = $_POST['nvm_surname_company'];
+			// $cart_item_data['epistoli_position'] = $_POST['nvm_space_company'];
+			$cart_item_data['epistoli_email'] = $_POST['nvm_email_company'];
 		}
 
 		if ( isset( $_POST['nvm_email'] ) ) {
