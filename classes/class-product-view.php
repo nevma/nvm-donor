@@ -132,7 +132,7 @@ class Product_View {
 
 		$chosen = WC()->session->get( 'nvm_radio_choice' );
 		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
-		$chosen = empty( $chosen ) ? 'custom' : $chosen;
+		$chosen = empty( $chosen ) ? '25' : $chosen;
 
 		$options = array();
 		$minimum = 1;
@@ -234,6 +234,7 @@ class Product_View {
 
 		echo '<h4 class="donor-simple-title">' . __( 'Στοιχεία Δωρητή', 'nevma' ) . '</h4>';
 		echo '<h4 class="donor-company-title">' . __( 'Στοιχεία εκπροσώπου εταιρείας', 'nevma' ) . '</h4>';
+		echo '<h4 class="donor-memoriam-title">' . __( 'Στοιχεία Δωρεάς εις μνήμης', 'nevma' ) . '</h4>';
 
 		woocommerce_form_field(
 			'nvm_email',
@@ -356,7 +357,7 @@ class Product_View {
 		);
 
 		woocommerce_form_field(
-			'nvm_name_company',
+			'nvm_epistoli_name',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Όνομα συγγενούς', 'nevma' ),
@@ -366,7 +367,7 @@ class Product_View {
 		);
 
 		woocommerce_form_field(
-			'nvm_surname_company',
+			'nvm_epistoli_surname',
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Επίθετο συγγενούς', 'nevma' ),
@@ -376,7 +377,7 @@ class Product_View {
 		);
 
 		woocommerce_form_field(
-			'nvm_email_company',
+			'nvm_epistoli_email',
 			array(
 				'type'     => 'email',
 				'label'    => __( 'email συγγενούς', 'nevma' ),
@@ -604,28 +605,32 @@ class Product_View {
 
 			// toggle choices to show when clicked
 			document.addEventListener('DOMContentLoaded', function () {
-				//Get the checkbox and the company field
+
+				//Get the checkbox and the memoriam invoice field
 				const timologioCheckbox = document.getElementById('nvm_memoriam_invoice');
-				const companyField = document.getElementById('nvm_memoriam_invoice_field');
+				const companyField = document.getElementById('nvm_memoriam_invoice_name_field');
 				const companyafm = document.getElementById('nvm_memoriam_invoice_afm_field');
 				const companydoy = document.getElementById('nvm_memoriam_invoice_doy_field');
 				const companyaddress = document.getElementById('nvm_memoriam_invoice_address_field');
 
 				// Hide the company field by default
 				companyField.style.display = 'none';
-				companyField.style.display = 'none';
 				companyafm.style.display = 'none';
 				companydoy.style.display = 'none';
+				companyaddress.style.display = 'none';
 
 				// Add an event listener to the checkbox
 				timologioCheckbox.addEventListener('change', function () {
 					if (this.checked) {
+
+						console.log('checked');
 						// Show the company field when the checkbox is checked
 						companyField.style.display = 'block';
 						companyafm.style.display = 'block';
 						companydoy.style.display = 'block';
 						companyaddress.style.display = 'block';
 					} else {
+						console.log('unchecked');
 						// Hide the company field when the checkbox is unchecked
 						companyField.style.display = 'none';
 						companyafm.style.display = 'none';
@@ -636,31 +641,27 @@ class Product_View {
 
 
 				const epistoliCheckbox = document.getElementById('nvm_epistoli');
-				const companyname = document.getElementById('nvm_name_company_field');
-				const companysurname = document.getElementById('nvm_surname_company_field');
-				//const companyspace = document.getElementById('nvm_space_company_field');
-				const companyemail = document.getElementById('nvm_email_company_field');
+				const epistoliName = document.getElementById('nvm_epistoli_name_field');
+				const epistoliSurname = document.getElementById('nvm_epistoli_surname_field');
+				const epistoliEmail = document.getElementById('nvm_epistoli_email_field');
 
 				// Hide the company field by default
-				companyname.style.display = 'none';
-				companysurname.style.display = 'none';
-				//companyspace.style.display = 'none';
-				companyemail.style.display = 'none';
+				epistoliName.style.display = 'none';
+				epistoliSurname.style.display = 'none';
+				epistoliEmail.style.display = 'none';
 
 				// Add an event listener to the checkbox
 				epistoliCheckbox.addEventListener('change', function () {
 					if (this.checked) {
 						// Show the company field when the checkbox is checked
-						companyname.style.display = 'block';
-						companysurname.style.display = 'block';
-						//companyspace.style.display = 'block';
-						companyemail.style.display = 'block';
+						epistoliName.style.display = 'block';
+						epistoliSurname.style.display = 'block';
+						epistoliEmail.style.display = 'block';
 					} else {
 						// Hide the company field when the checkbox is unchecked
-						companyname.style.display = 'none';
-						companysurname.style.display = 'none';
-						//companyspace.style.display = 'none';
-						companyemail.style.display = 'none';
+						epistoliName.style.display = 'none';
+						epistoliSurname.style.display = 'none';
+						epistoliEmail.style.display = 'none';
 					}
 				});
 
@@ -722,6 +723,14 @@ class Product_View {
 				display:none;
 			}
 
+			/* Hide fields for epistoli donor */
+			.donor-box #nvm_epistoli_field,
+			.donor-box #nvm_epistoli_name_field,
+			.donor-box #nvm_epistoli_surname_field,
+			.donor-box #nvm_epistoli_email_field{
+				display:none;
+			}
+
 			.donor-box #nvm_memoriam_invoice_field,
 			.donor-box #nvm_memoriam_invoice_name_field,
 			.donor-box #nvm_memoriam_invoice_afm_field,
@@ -756,10 +765,15 @@ class Product_View {
 			}
 
 			/* Show fields for memoriam donor */
+			.donor-box .donor-memoriam .donor-memoriam-title,
 			.donor-box .donor-memoriam #nvm_memoriam_invoice_field,
 			.donor-box .donor-memoriam #nvm_dead_name_field,
 			.donor-box .donor-memoriam #nvm_epistoli_field{
 				display:block;
+			}
+
+			.donor-box .donor-memoriam .donor-simple-title{
+				display:none;
 			}
 
 			.donor-box input[type="radio"] + label::after,
@@ -866,7 +880,7 @@ class Product_View {
 
 			.donor-box #type_of_donation_field > span{
 				display: grid;
-				grid-template-columns: repeat(3, 1fr); /* Δημιουργεί 3 ίσες ��τήλες */
+				grid-template-columns: repeat(3, 1fr); /* ��ημιουργεί 3 ίσες ��τήλες */
 				gap: 0px;
 
 			}
@@ -989,8 +1003,7 @@ class Product_View {
 		if ( isset( $_POST['nvm_epistoli'] ) ) {
 			$cart_item_data['epistoli_name']    = $_POST['nvm_name_company'];
 			$cart_item_data['epistoli_surname'] = $_POST['nvm_surname_company'];
-			// $cart_item_data['epistoli_position'] = $_POST['nvm_space_company'];
-			$cart_item_data['epistoli_email'] = $_POST['nvm_email_company'];
+			$cart_item_data['epistoli_email']   = $_POST['nvm_email_company'];
 		}
 
 		if ( isset( $_POST['nvm_email'] ) ) {
@@ -1031,9 +1044,17 @@ class Product_View {
 		}
 
 		if ( isset( $_POST['nvm_timologio'] ) ) {
-			$cart_item_data['timologio_company'] = $_POST['nvm_company'];
-			$cart_item_data['timologio_afm']     = $_POST['nvm_afm'];
-			$cart_item_data['timologio_doy']     = $_POST['nvm_doy'];
+			$cart_item_data['timologio_company'] = $_POST['nvm_company_name'];
+			$cart_item_data['timologio_afm']     = $_POST['nvm_company_afm'];
+			$cart_item_data['timologio_doy']     = $_POST['nvm_company_doy'];
+			$cart_item_data['timologio_address'] = $_POST['nvm_company_address'];
+		}
+
+		if ( isset( $_POST['nvm_memoriam_invoice'] ) ) {
+			$cart_item_data['memoriam_invoice_name']    = $_POST['nvm_memoriam_invoice_name'];
+			$cart_item_data['memoriam_invoice_afm']     = $_POST['nvm_memoriam_invoice_afm'];
+			$cart_item_data['memoriam_invoice_doy']     = $_POST['nvm_memoriam_invoice_doy'];
+			$cart_item_data['memoriam_invoice_address'] = $_POST['nvm_memoriam_invoice_address'];
 		}
 
 		if ( isset( $_POST['nvm_radio_choice'] ) ) {
@@ -1087,25 +1108,30 @@ class Product_View {
 	public function add_donation_to_order_items( $item, $cart_item_key, $values, $order ) {
 		// Define a list of keys you want to save to the order item.
 		$custom_keys = array(
-			'type_of_donation'  => __( 'Τύπος Δωρεάς', 'nevma' ),
-			'epistoli_name'     => __( 'Όνομα Επιστολής', 'nevma' ),
-			'epistoli_surname'  => __( 'Επώνυμο Επιστολής', 'nevma' ),
-			'epistoli_position' => __( 'Θέση Επιστολής', 'nevma' ),
-			'epistoli_email'    => __( 'Email Επιστολής', 'nevma' ),
-			'user_email'        => __( 'Email Δωρητή', 'nevma' ),
-			'user_name'         => __( 'Όνομα Δωρητή', 'nevma' ),
-			'user_surname'      => __( 'Επώνυμο Δωρητή', 'nevma' ),
-			'user_address'      => __( 'Διεύθυνση Δωρητή', 'nevma' ),
-			'user_town'         => __( 'Πόλη Δωρητή', 'nevma' ),
-			'user_postal'       => __( 'Ταχυδρομικός Κώδικας Δωρητή', 'nevma' ),
-			'user_telephone'    => __( 'Τηλέφωνο Δωρηρή', 'nevma' ),
-			'dead_name'         => __( 'Όνομα Αποθανόντος', 'nevma' ),
-			'dead_relative'     => __( 'Συγγένεια Αποθανόντος', 'nevma' ),
-			'dead_message'      => __( 'Μήνυμα Αποθα��όντος', 'nevma' ),
-			'timologio_company' => __( 'Εταιρεία Τιμολογίου', 'nevma' ),
-			'timologio_afm'     => __( 'ΑΦΜ Τιμολογίου', 'nevma' ),
-			'timologio_doy'     => __( 'ΔΟΥ Τιμολογίου', 'nevma' ),
-			'nvm_radio_choice'  => __( 'Ποσό Δωρεάς', 'nevma' ),
+			'type_of_donation'         => __( 'Τύπος Δωρεάς', 'nevma' ),
+			'epistoli_name'            => __( 'Όνομα Επιστολής', 'nevma' ),
+			'epistoli_surname'         => __( 'Επώνυμο Επιστολής', 'nevma' ),
+			'epistoli_position'        => __( 'Θέση Επιστολής', 'nevma' ),
+			'epistoli_email'           => __( 'Email Επιστολής', 'nevma' ),
+			'user_email'               => __( 'Email Δωρητή', 'nevma' ),
+			'user_name'                => __( 'Όνομα Δωρητή', 'nevma' ),
+			'user_surname'             => __( 'Επώνυμο Δωρητή', 'nevma' ),
+			'user_address'             => __( 'Διεύθυνση Δωρητή', 'nevma' ),
+			'user_town'                => __( 'Πόλη Δωρητή', 'nevma' ),
+			'user_postal'              => __( 'Ταχυδρομικός Κώδικας Δωρητή', 'nevma' ),
+			'user_telephone'           => __( 'Τηλέφωνο Δωρητή', 'nevma' ),
+			'dead_name'                => __( 'Όνομα Αποθανόντος', 'nevma' ),
+			'dead_relative'            => __( 'Συγγένεια Αποθανόντος', 'nevma' ),
+			'dead_message'             => __( 'Μήνυμα Αποθανόντος', 'nevma' ),
+			'timologio_company'        => __( 'Εταιρεία Τιμολογίου', 'nevma' ),
+			'timologio_afm'            => __( 'ΑΦΜ Τιμολογίου', 'nevma' ),
+			'timologio_doy'            => __( 'ΔΟΥ Τιμολογίου', 'nevma' ),
+			'timologio_address'        => __( 'Διεύθυνση Τιμολογίου', 'nevma' ),
+			'nvm_radio_choice'         => __( 'Ποσό Δωρεάς', 'nevma' ),
+			'memoriam_invoice_name'    => __( 'Όνομα Δωρεάς εις μνήμη', 'nevma' ),
+			'memoriam_invoice_afm'     => __( 'ΑΦΜ Δωρεάς εις μνήμη', 'nevma' ),
+			'memoriam_invoice_doy'     => __( 'ΔΟΥ Δωρεάς εις μνήμη', 'nevma' ),
+			'memoriam_invoice_address' => __( 'Διεύθυνση Δωρεάς εις μνήμη', 'nevma' ),
 		);
 
 		// Loop through custom keys and add them to the order item if they exist.
