@@ -764,6 +764,13 @@ class Product_View {
 				display:none;
 			}
 
+			/* Hide fields for Corporate donor in the main form */
+			.donor-box .donor-corporate #nvm_address_field,
+			.donor-box .donor-corporate #nvm_town_field,
+			.donor-box .donor-corporate #nvm_postal_field{
+				display:none;
+			}
+
 			/* Show fields for memoriam donor */
 			.donor-box .donor-memoriam .donor-memoriam-title,
 			.donor-box .donor-memoriam #nvm_memoriam_invoice_field,
