@@ -268,30 +268,39 @@ class Product_View {
 		woocommerce_form_field(
 			'nvm_address',
 			array(
-				'type'     => 'text',
-				'label'    => __( 'Διεύθυνση', 'nevma' ),
-				'required' => true,
-				'class'    => array( 'form-row-wide', 'common' ),
+				'type'              => 'text',
+				'label'             => __( 'Διεύθυνση', 'nevma' ),
+				'required'          => true,
+				'custom_attributes' => array(
+					'data-conditional-required' => 'true',
+				),
+				'class'             => array( 'form-row-wide', 'common' ),
 			)
 		);
 
 		woocommerce_form_field(
 			'nvm_town',
 			array(
-				'type'     => 'text',
-				'label'    => __( 'Πόλη', 'nevma' ),
-				'required' => true,
-				'class'    => array( 'form-row-first', 'common' ),
+				'type'              => 'text',
+				'label'             => __( 'Πόλη', 'nevma' ),
+				'required'          => true,
+				'custom_attributes' => array(
+					'data-conditional-required' => 'true',
+				),
+				'class'             => array( 'form-row-first', 'common' ),
 			)
 		);
 
 		woocommerce_form_field(
 			'nvm_postal',
 			array(
-				'type'     => 'text',
-				'label'    => __( 'Τ.Κ.', 'nevma' ),
-				'required' => true,
-				'class'    => array( 'form-row-last', 'common' ),
+				'type'              => 'text',
+				'label'             => __( 'Τ.Κ.', 'nevma' ),
+				'required'          => true,
+				'custom_attributes' => array(
+					'data-conditional-required' => 'true',
+				),
+				'class'             => array( 'form-row-last', 'common' ),
 			)
 		);
 
@@ -573,15 +582,12 @@ class Product_View {
 
 				if (addToCartButton) {
 					addToCartButton.addEventListener('click', function (e) {
-						const requiredFields = [
-							'nvm_email',
-							'nvm_name',
-							'nvm_surname',
-							'nvm_address',
-							'nvm_town',
-							'nvm_postal',
-							'nvm_telephone'
-						];
+						const donorType = document.querySelector('input[name="type_of_donation"]:checked')?.value;
+						let requiredFields = ['nvm_email', 'nvm_name', 'nvm_surname', 'nvm_telephone'];
+
+						if (donorType !== 'corporate') {
+							requiredFields.push('nvm_address', 'nvm_town', 'nvm_postal');
+						}
 
 						let isValid = true;
 
@@ -591,7 +597,7 @@ class Product_View {
 								isValid = false;
 								field.classList.add('error'); // Add error class for styling
 								alert(`Το πεδίο "${field.labels[0].textContent}" είναι υποχρεωτικό.`);
-							} else {
+							} else if (field) {
 								field.classList.remove('error'); // Remove error class if valid
 							}
 						});
@@ -887,7 +893,7 @@ class Product_View {
 
 			.donor-box #type_of_donation_field > span{
 				display: grid;
-				grid-template-columns: repeat(3, 1fr); /* ��ημιουργεί 3 ίσες ��τήλες */
+				grid-template-columns: repeat(3, 1fr); /* Creates 3 equal columns */
 				gap: 0px;
 
 			}
@@ -920,7 +926,7 @@ class Product_View {
 			}
 
 			.donor-box #nvm_radio_choice_field label:last-child {
-				grid-column: 1 / -1; /* εκτείνεται σε όλες ��ις στήλες */
+				grid-column: 1 / -1; /* Extends to all columns */
 			}
 
 			.donor-box #nvm_radio_choice_field label{
@@ -951,20 +957,24 @@ class Product_View {
 			return $passed;
 		}
 
+		$donor_type = isset( $_POST['type_of_donation'] ) ? sanitize_text_field( $_POST['type_of_donation'] ) : 'individual';
+
 		$required_fields = array(
 			'nvm_email'     => 'email',
 			'nvm_name'      => 'Όνομα',
 			'nvm_surname'   => 'Επίθετο',
-			'nvm_address'   => 'Διεύθυνση',
-			'nvm_town'      => 'Πόλη',
-			'nvm_postal'    => 'Ταχυδρομικός Κώδικας',
 			'nvm_telephone' => 'Τηλέφωνο',
-
 		);
+
+		if ( 'corporate' !== $donor_type ) {
+			$required_fields['nvm_address'] = 'Διεύθυνση';
+			$required_fields['nvm_town']    = 'Πόλη';
+			$required_fields['nvm_postal']  = 'Ταχυδρομικός Κώδικας';
+		}
 
 		foreach ( $required_fields as $field => $error ) {
 			if ( empty( $_POST[ $field ] ) ) {
-				wc_add_notice( sprintf( __( 'Το πεδίο "%s" είναι υποχρεωτι��ό.', 'nevma' ), $error ), 'error' );
+				wc_add_notice( sprintf( __( 'Το πεδίο "%s" είναι υποχρεωτικό.', 'nevma' ), $error ), 'error' );
 				$passed = false;
 			}
 		}
@@ -1050,14 +1060,16 @@ class Product_View {
 			$cart_item_data['dead_message']  = $_POST['nvm_dead_message'];
 		}
 
-		if ( isset( $_POST['nvm_timologio'] ) ) {
+		// Corporate donor
+		if ( isset( $_POST['type_of_donation'] ) && 'corporate' === $_POST['type_of_donation'] ) {
 			$cart_item_data['timologio_company'] = $_POST['nvm_company_name'];
 			$cart_item_data['timologio_afm']     = $_POST['nvm_company_afm'];
 			$cart_item_data['timologio_doy']     = $_POST['nvm_company_doy'];
 			$cart_item_data['timologio_address'] = $_POST['nvm_company_address'];
 		}
 
-		if ( isset( $_POST['nvm_memoriam_invoice'] ) ) {
+		// Memoriam donor
+		if ( isset( $_POST['type_of_donation'] ) && 'memoriam' === $_POST['type_of_donation'] && isset( $_POST['nvm_memoriam_invoice'] ) ) {
 			$cart_item_data['memoriam_invoice_name']    = $_POST['nvm_memoriam_invoice_name'];
 			$cart_item_data['memoriam_invoice_afm']     = $_POST['nvm_memoriam_invoice_afm'];
 			$cart_item_data['memoriam_invoice_doy']     = $_POST['nvm_memoriam_invoice_doy'];
@@ -1125,7 +1137,7 @@ class Product_View {
 			'user_surname'             => __( 'Επώνυμο Δωρητή', 'nevma' ),
 			'user_address'             => __( 'Διεύθυνση Δωρητή', 'nevma' ),
 			'user_town'                => __( 'Πόλη Δωρητή', 'nevma' ),
-			'user_postal'              => __( '��αχυδρομικός Κώδικας Δωρητή', 'nevma' ),
+			'user_postal'              => __( 'Ταχυδρομικός Κώδικας Δωρητή', 'nevma' ),
 			'user_telephone'           => __( 'Τηλέφωνο Δωρητή', 'nevma' ),
 			'dead_name'                => __( 'Όνομα Αποθανόντος', 'nevma' ),
 			'dead_relative'            => __( 'Συγγένεια Αποθανόντος', 'nevma' ),
