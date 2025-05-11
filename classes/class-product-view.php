@@ -589,6 +589,20 @@ class Product_View {
 							requiredFields.push('nvm_address', 'nvm_town', 'nvm_postal');
 						}
 
+						if (donorType === 'memoriam') {
+							const epistoliChecked = document.getElementById('nvm_epistoli')?.checked;
+							if (epistoliChecked) {
+								requiredFields.push('nvm_epistoli_name', 'nvm_epistoli_surname', 'nvm_epistoli_email');
+							}
+						}
+
+						if (donorType === 'memoriam') {
+							const invoiceChecked = document.getElementById('nvm_memoriam_invoice')?.checked;
+							if (invoiceChecked) {
+								requiredFields.push('nvm_memoriam_invoice_name', 'nvm_memoriam_invoice_afm', 'nvm_memoriam_invoice_doy', 'nvm_memoriam_invoice_address');
+							}
+						}
+
 						let isValid = true;
 
 						requiredFields.forEach(fieldId => {
