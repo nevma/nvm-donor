@@ -720,7 +720,7 @@ class Product_View {
 			.donor-box #nvm_dead_field,
 			.donor-box #nvm_dead_name_field,
 			.donor-company-title,
-			.donor-memoriam-title,{
+			.donor-memoriam-title{
 				display:none;
 			}
 
@@ -740,7 +740,6 @@ class Product_View {
 				display:none;
 			}
 
-			.donor-box .donor-company-title,
 			.donor-box #nvm_company_field,
 			.donor-box #nvm_company_afm_field,
 			.donor-box #nvm_company_doy_field,
@@ -1126,7 +1125,7 @@ class Product_View {
 			'user_surname'             => __( 'Επώνυμο Δωρητή', 'nevma' ),
 			'user_address'             => __( 'Διεύθυνση Δωρητή', 'nevma' ),
 			'user_town'                => __( 'Πόλη Δωρητή', 'nevma' ),
-			'user_postal'              => __( 'Ταχυδρομικός Κώδικας Δωρητή', 'nevma' ),
+			'user_postal'              => __( '��αχυδρομικός Κώδικας Δωρητή', 'nevma' ),
 			'user_telephone'           => __( 'Τηλέφωνο Δωρητή', 'nevma' ),
 			'dead_name'                => __( 'Όνομα Αποθανόντος', 'nevma' ),
 			'dead_relative'            => __( 'Συγγένεια Αποθανόντος', 'nevma' ),
