@@ -21,6 +21,7 @@ namespace Nvm;
 
 use Nvm\Donor\Product_View as Nvm_Product_View;
 use Nvm\Donor\Product_Donor as Nvm_Product_Type;
+use Nvm\Donor\Email_Handler as Nvm_Email_Handler;
 
 /**
  * Check that the file is not accessed directly.
@@ -92,7 +93,7 @@ class Donor {
 	public function __construct() {
 
 		// Set the plugin version.
-		self::$plugin_version = '1.0.1';
+		self::$plugin_version = '1.0.3';
 
 		// Set the plugin namespace.
 		self::$namespace_prefix = 'Nvm\\Donor';
@@ -107,7 +108,7 @@ class Donor {
 		self::autoload();
 		self::initiate_product_type();
 		self::initiate_product_donor();
-
+		self::initiate_email_handler();
 		// Declare HPOS Compability
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
@@ -174,18 +175,17 @@ class Donor {
 		new Nvm_Product_Type();
 	}
 
-
-
+	public function initiate_email_handler() {
+		new Nvm_Email_Handler();
+	}
 
 	public function enqueue_donor_script() {
-		// if ( is_checkout() ) {
-		// wp_enqueue_style(
-		// 'nvm-donor',
-		// plugin_dir_url( __FILE__ ) . 'css/style.css',
-		// array(),
-		// self::$plugin_version
-		// );
-		// }
+			wp_enqueue_style(
+				'nvm-donor',
+				plugin_dir_url( __FILE__ ) . 'css/style.css',
+				array(),
+				self::$plugin_version
+			);
 	}
 
 	/**

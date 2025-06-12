@@ -105,9 +105,18 @@ class Product_View {
 	 * and renders the form field.
 	 */
 	public function get_donor_type() {
+		$chosen = '';
 
-		$chosen = WC()->session->get( 'type_of_donation' );
-		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'type_of_donation' ) : $chosen;
+		// Safely check if WC()->session exists and is initialized
+		if ( WC() && WC()->session && WC()->session->get( 'type_of_donation' ) ) {
+			$chosen = WC()->session->get( 'type_of_donation' );
+		}
+
+		// Safely check if WC()->checkout exists and is initialized
+		if ( empty( $chosen ) && WC() && WC()->checkout ) {
+			$chosen = WC()->checkout->get_value( 'type_of_donation' );
+		}
+
 		$chosen = empty( $chosen ) ? 'individual' : $chosen;
 
 		$options = array(
@@ -127,12 +136,21 @@ class Product_View {
 	}
 
 	public function get_donor_prices() {
-
 		global $product;
 
-		$chosen = WC()->session->get( 'nvm_radio_choice' );
-		$chosen = empty( $chosen ) ? WC()->checkout->get_value( 'nvm_radio_choice' ) : $chosen;
-		$chosen = empty( $chosen ) ? '25' : $chosen;
+		$chosen = '';
+
+		// Safely check if WC()->session exists and is initialized
+		if ( WC() && WC()->session && WC()->session->get( 'nvm_radio_choice' ) ) {
+			$chosen = WC()->session->get( 'nvm_radio_choice' );
+		}
+
+		// Safely check if WC()->checkout exists and is initialized
+		if ( empty( $chosen ) && WC() && WC()->checkout ) {
+			$chosen = WC()->checkout->get_value( 'nvm_radio_choice' );
+		}
+
+		$chosen = empty( $chosen ) ? 'custom' : $chosen;
 
 		$options = array();
 		$minimum = 1;
@@ -234,7 +252,7 @@ class Product_View {
 
 		echo '<h4 class="donor-simple-title">' . __( 'Στοιχεία Δωρητή', 'nevma' ) . '</h4>';
 		echo '<h4 class="donor-company-title">' . __( 'Στοιχεία εκπροσώπου εταιρείας', 'nevma' ) . '</h4>';
-		echo '<h4 class="donor-memoriam-title">' . __( 'Στοιχεία Δωρεάς εις μνήμης', 'nevma' ) . '</h4>';
+		echo '<h4 class="donor-memoriam-title">' . __( 'Στοιχεία Δωρεάς εις μνήμην', 'nevma' ) . '</h4>';
 
 		woocommerce_form_field(
 			'nvm_email',
@@ -370,7 +388,7 @@ class Product_View {
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Όνομα συγγενούς', 'nevma' ),
-				'required' => false,
+				'required' => true,
 				'class'    => array( 'form-row-first', 'epistoli' ),
 			)
 		);
@@ -380,7 +398,7 @@ class Product_View {
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Επίθετο συγγενούς', 'nevma' ),
-				'required' => false,
+				'required' => true,
 				'class'    => array( 'form-row-last', 'epistoli' ),
 			)
 		);
@@ -390,7 +408,7 @@ class Product_View {
 			array(
 				'type'     => 'email',
 				'label'    => __( 'email συγγενούς', 'nevma' ),
-				'required' => false,
+				'required' => true,
 				'class'    => array( 'form-row-wide', 'epistoli' ),
 			)
 		);
@@ -400,7 +418,7 @@ class Product_View {
 			array(
 				'type'     => 'checkbox',
 				'label'    => __( 'Η δωρεά ΕΙΣ ΜΝΗΜΗ γινεται εκ μέρους εταιρείας;', 'nevma' ),
-				'required' => false,
+				'required' => true,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
 		);
@@ -410,7 +428,7 @@ class Product_View {
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Επωνυμία εταιρίας', 'nevma' ),
-				'required' => false,
+				'required' => true,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
 		);
@@ -420,7 +438,7 @@ class Product_View {
 			array(
 				'type'     => 'text',
 				'label'    => __( 'ΑΦΜ', 'nevma' ),
-				'required' => false,
+				'required' => true,
 				'class'    => array( 'form-row-first', 'memoriam' ),
 			)
 		);
@@ -430,7 +448,7 @@ class Product_View {
 			array(
 				'type'     => 'text',
 				'label'    => __( 'ΔΟΥ', 'nevma' ),
-				'required' => false,
+				'required' => true,
 				'class'    => array( 'form-row-last', 'memoriam' ),
 			)
 		);
@@ -440,7 +458,7 @@ class Product_View {
 			array(
 				'type'     => 'text',
 				'label'    => __( 'Διεύθυνση Εδρας', 'nevma' ),
-				'required' => false,
+				'required' => true,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
 		);
@@ -1090,6 +1108,13 @@ class Product_View {
 			$cart_item_data['memoriam_invoice_address'] = $_POST['nvm_memoriam_invoice_address'];
 		}
 
+		// Memoriam donor
+		if ( isset( $_POST['type_of_donation'] ) && 'memoriam' === $_POST['type_of_donation'] && isset( $_POST['nvm_epistoli'] ) ) {
+			$cart_item_data['memoriam_name']    = $_POST['nvm_epistoli_name'];
+			$cart_item_data['memoriam_surname'] = $_POST['nvm_epistoli_surname'];
+			$cart_item_data['memoriam_email']   = $_POST['nvm_epistoli_email'];
+		}
+
 		if ( isset( $_POST['nvm_radio_choice'] ) ) {
 
 			if ( 'custom' === $_POST['nvm_radio_choice'] ) {
@@ -1113,15 +1138,12 @@ class Product_View {
 	 * @param WC_Cart $cart The WooCommerce cart object.
 	 */
 	public function adjust_product_price_based_on_choice( $cart ) {
-
 		if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
 			return;
 		}
 
-		if ( ! WC()->cart->is_empty() ) {
-
+		if ( WC() && WC()->cart && ! WC()->cart->is_empty() ) {
 			foreach ( $cart->get_cart() as $cart_item ) {
-
 				if ( isset( $cart_item['nvm_radio_choice'] ) ) {
 					$new_price = $cart_item['nvm_radio_choice']; // The new price from radio choice.
 					$cart_item['data']->set_price( $new_price );
@@ -1165,6 +1187,9 @@ class Product_View {
 			'memoriam_invoice_afm'     => __( 'ΑΦΜ Δωρεάς εις μνήμη', 'nevma' ),
 			'memoriam_invoice_doy'     => __( 'ΔΟΥ Δωρεάς εις μνήμη', 'nevma' ),
 			'memoriam_invoice_address' => __( 'Διεύθυνση Δωρεάς εις μνήμη', 'nevma' ),
+			'memoriam_name'            => __( 'Όνομα συγγενούς', 'nevma' ),
+			'memoriam_surname'         => __( 'Επώνυμο συγγενούς', 'nevma' ),
+			'memoriam_email'           => __( 'Email συγγενούς', 'nevma' ),
 		);
 
 		// Loop through custom keys and add them to the order item if they exist.
@@ -1183,27 +1208,28 @@ class Product_View {
 	 */
 	public function update_billing_details_from_donation( $order, $data ) {
 		// Get cart items.
-		foreach ( WC()->cart->get_cart() as $cart_item ) {
+		if ( WC() && WC()->cart ) {
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				// Update billing fields only if custom donation data exists.
+				if ( isset( $cart_item['user_name'] ) ) {
+					$order->set_billing_first_name( sanitize_text_field( $cart_item['user_name'] ) );
+				}
 
-			// Update billing fields only if custom donation data exists.
-			if ( isset( $cart_item['user_name'] ) ) {
-				$order->set_billing_first_name( sanitize_text_field( $cart_item['user_name'] ) );
+				if ( isset( $cart_item['user_surname'] ) ) {
+					$order->set_billing_last_name( sanitize_text_field( $cart_item['user_surname'] ) );
+				}
+
+				if ( isset( $cart_item['user_email'] ) ) {
+					$order->set_billing_email( sanitize_email( $cart_item['user_email'] ) );
+				}
+
+				if ( isset( $cart_item['user_telephone'] ) ) {
+					$order->set_billing_phone( sanitize_text_field( $cart_item['user_telephone'] ) );
+				}
+
+				// If you only want to update the first item, break the loop.
+				break;
 			}
-
-			if ( isset( $cart_item['user_surname'] ) ) {
-				$order->set_billing_last_name( sanitize_text_field( $cart_item['user_surname'] ) );
-			}
-
-			if ( isset( $cart_item['user_email'] ) ) {
-				$order->set_billing_email( sanitize_email( $cart_item['user_email'] ) );
-			}
-
-			if ( isset( $cart_item['user_telephone'] ) ) {
-				$order->set_billing_phone( sanitize_text_field( $cart_item['user_telephone'] ) );
-			}
-
-			// If you only want to update the first item, break the loop.
-			break;
 		}
 	}
 
@@ -1252,24 +1278,26 @@ class Product_View {
 	 */
 	public function remove_checkout_fields( $fields ) {
 		// Get cart items
-		$cart_items = WC()->cart->get_cart();
+		if ( WC() && WC()->cart ) {
+			$cart_items = WC()->cart->get_cart();
 
-		// Check if any cart item is a donor product
-		$has_donor_product = false;
-		foreach ( $cart_items as $cart_item ) {
-			$product = $cart_item['data'];
-			if ( $this->product_is_donor( $product ) ) {
-				$has_donor_product = true;
-				break;
+			// Check if any cart item is a donor product
+			$has_donor_product = false;
+			foreach ( $cart_items as $cart_item ) {
+				$product = $cart_item['data'];
+				if ( $this->product_is_donor( $product ) ) {
+					$has_donor_product = true;
+					break;
+				}
 			}
-		}
 
-		// If cart has donor product, remove shipping fields
-		if ( $has_donor_product ) {
-			unset( $fields['shipping'] );
+			// If cart has donor product, remove shipping fields
+			if ( $has_donor_product ) {
+				unset( $fields['shipping'] );
 
-			// Remove billing fields we don't need
-			unset( $fields['billing'] );
+				// Remove billing fields we don't need
+				unset( $fields['billing'] );
+			}
 		}
 
 		// Remove order comments/additional information field
@@ -1283,14 +1311,16 @@ class Product_View {
 	 */
 	public function add_donor_class_to_checkout( $classes ) {
 		// Get cart items
-		$cart_items = WC()->cart->get_cart();
+		if ( WC() && WC()->cart ) {
+			$cart_items = WC()->cart->get_cart();
 
-		// Check if any cart item is a donor product
-		foreach ( $cart_items as $cart_item ) {
-			$product = $cart_item['data'];
-			if ( $this->product_is_donor( $product ) ) {
-				$classes[] = 'has-donor-product';
-				break;
+			// Check if any cart item is a donor product
+			foreach ( $cart_items as $cart_item ) {
+				$product = $cart_item['data'];
+				if ( $this->product_is_donor( $product ) ) {
+					$classes[] = 'has-donor-product';
+					break;
+				}
 			}
 		}
 
@@ -1327,7 +1357,9 @@ class Product_View {
 
 		// Capture the output of the donation form.
 		ob_start();
+		echo '<div class="container-donor-box">';
 		echo $this->add_donation_carts( $product );
+		echo '</div>';
 		// Add the add to cart button
 		return ob_get_clean();
 	}
