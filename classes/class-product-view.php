@@ -1391,15 +1391,25 @@ class Product_View {
 	 * @return string Modified button text
 	 */
 	public function change_place_order_button_text() {
-		// Check if cart contains a donor product
-		if ( WC() && WC()->cart ) {
-			foreach ( WC()->cart->get_cart() as $cart_item ) {
-				$product = $cart_item['data'];
-				if ( $this->product_is_donor( $product ) ) {
-					return __( 'Ολοκλήρωση Δωρεάς', 'nevma' );
-				}
+		// Only proceed if we're on the checkout page
+		if ( ! is_checkout() ) {
+			return __( 'Ολοκλήρωση Πληρωμής', 'nevma' );
+		}
+
+		// Check if cart exists and is not empty
+		if ( ! WC() || ! WC()->cart || WC()->cart->is_empty() ) {
+			return __( 'Ολοκλήρωση Πληρωμής', 'nevma' );
+		}
+
+		// Check if any cart item is a donor product
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$product = $cart_item['data'];
+			if ( $product && $this->product_is_donor( $product ) ) {
+				return __( 'Ολοκλήρωση Δωρεάς', 'nevma' );
 			}
 		}
+
+		// Default text if no donor products found
 		return __( 'Ολοκλήρωση Πληρωμής', 'nevma' );
 	}
 }

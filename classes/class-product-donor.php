@@ -329,10 +329,6 @@ class Product_Donor extends WC_Product_Simple {
 	}
 
 	public static function custom_email_content( $order ) {
-		error_log( '$order:' );
-		error_log( print_r( $order, true ) );
-
-		return;
 
 		$items = $order->get_items();
 
