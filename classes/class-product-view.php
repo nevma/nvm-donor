@@ -56,6 +56,9 @@ class Product_View {
 
 		// Add shortcode
 		add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
+
+		// Change place order button text
+		add_filter( 'woocommerce_order_button_text', array( $this, 'change_place_order_button_text' ) );
 	}
 
 	/**
@@ -1380,5 +1383,23 @@ class Product_View {
 			}
 		</style>
 		<?php
+	}
+
+	/**
+	 * Change the place order button text on checkout
+	 *
+	 * @return string Modified button text
+	 */
+	public function change_place_order_button_text() {
+		// Check if cart contains a donor product
+		if ( WC() && WC()->cart ) {
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				$product = $cart_item['data'];
+				if ( $this->product_is_donor( $product ) ) {
+					return __( 'Ολοκλήρωση Δωρεάς', 'nevma' );
+				}
+			}
+		}
+		return __( 'Ολοκλήρωση Πληρωμής', 'nevma' );
 	}
 }
