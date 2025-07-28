@@ -1,3 +1,16 @@
+.wc_payment_method.payment_method_bacs {
+	position: relative;
+	padding-left: calc(var(--text-rhythm) / 4);
+}
+
+.wc_payment_method.payment_method_bacs #payment_method_bacs ~ label:before,
+.wc_payment_method.payment_method_bacs
+	#payment_method_bacs:checked
+	+ label:after {
+	top: 5px;
+	left: 10px;
+}
+
 .vanilla-layout-home-slideshow .responsiville-slideshow.donor-slideshow {
 	height: 1600px !important;
 }
@@ -154,4 +167,19 @@
 
 .container-donor-box .donor-box label {
 	clear: both;
+}
+
+/* Thank you page styling when payment is Bank */
+
+.woocommerce-order-received h3.wc-bacs-bank-details-account-name {
+	font-size: 15px;
+}
+
+.woocommerce-order-received .wc-bacs-bank-details.order_details.bacs_details {
+	padding-left: 0rem;
+	padding-top: 10px;
+}
+
+.woocommerce-order-received h2.wc-bacs-bank-details-heading {
+	padding-bottom: 10px;
 }
