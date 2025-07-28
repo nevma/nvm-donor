@@ -263,40 +263,40 @@ class Product_Donor extends WC_Product_Simple {
 		return 'donor' === $product->get_type();
 	}
 
-	public static function restrict_donor_product_cart( $passed, $product_id, $quantity ) {
-		$product = wc_get_product( $product_id );
+	// public static function restrict_donor_product_cart( $passed, $product_id, $quantity ) {
+	// $product = wc_get_product( $product_id );
 
-		if ( $product && 'donor' === $product->get_type() ) {
-			foreach ( WC()->cart->get_cart() as $cart_item ) {
-				$cart_product = $cart_item['data'];
-				if ( $cart_product && 'donor' === $cart_product->get_type() ) {
-					wc_add_notice(
-						__( 'We are sorry, but you can only have one Donation in your cart. View your cart <a href="' . wc_get_cart_url() . '">εδώ</a>.', 'nevma-donor' ),
-						'error'
-					);
-					return false;
-				}
-			}
-		}
+	// if ( $product && 'donor' === $product->get_type() ) {
+	// foreach ( WC()->cart->get_cart() as $cart_item ) {
+	// $cart_product = $cart_item['data'];
+	// if ( $cart_product && 'donor' === $cart_product->get_type() ) {
+	// wc_add_notice(
+	// __( 'We are sorry, but you can only have one Donation in your cart. View your cart <a href="' . wc_get_cart_url() . '">εδώ</a>.', 'nevma-donor' ),
+	// 'error'
+	// );
+	// return false;
+	// }
+	// }
+	// }
 
-		return $passed;
-	}
+	// return $passed;
+	// }
 
-	public static function ensure_one_donor_product_in_cart( $cart_item_data, $product_id ) {
-		$product = wc_get_product( $product_id );
+	// public static function ensure_one_donor_product_in_cart( $cart_item_data, $product_id ) {
+	// $product = wc_get_product( $product_id );
 
-		if ( $product && 'donor' === $product->get_type() ) {
-			WC()->cart->empty_cart(); // Empty the cart before adding a donor product.
-		}
+	// if ( $product && 'donor' === $product->get_type() ) {
+	// WC()->cart->empty_cart(); // Empty the cart before adding a donor product.
+	// }
 
-		return $cart_item_data;
-	}
+	// return $cart_item_data;
+	// }
 
 	// If already there is on cart a donor remove it and add the new one
-	public static function remove_donor_product_from_cart( $product_id ) {
-		$product = wc_get_product( $product_id );
-		if ( $product && 'donor' === $product->get_type() ) {
-			WC()->cart->remove_cart_item( $product_id );
-		}
-	}
+	// public static function remove_donor_product_from_cart( $product_id ) {
+	// $product = wc_get_product( $product_id );
+	// if ( $product && 'donor' === $product->get_type() ) {
+	// WC()->cart->remove_cart_item( $product_id );
+	// }
+	// }
 }
