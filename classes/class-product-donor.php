@@ -124,7 +124,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_third_price',
-				'label'    => __( 'Price Γ', 'nvm-donor' ),
+				'label'    => __( 'Price C', 'nvm-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
