@@ -1260,10 +1260,6 @@ class Product_View {
 
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
 
-		// add a error statement
-		error_log( __METHOD__ );
-		error_log( print_r( $cart_item_key, true ) );
-
 		// Target specific product for donations.
 		$product = wc_get_product( $product_id );
 
