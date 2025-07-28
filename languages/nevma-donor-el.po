@@ -1,0 +1,356 @@
+# Greek translation for WooCommerce Donor plugin by Nevma
+# Copyright (C) 2024 Nevma Team
+# This file is distributed under the same license as the WooCommerce Donor plugin by Nevma package.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce Donor plugin by Nevma 1.1.4\n"
+"Report-Msgid-Bugs-To: https://woocommerce.com/vendor/nevma/\n"
+"POT-Creation-Date: 2024-01-01 12:00+0000\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: Nevma Team <info@nevma.gr>\n"
+"Language-Team: Greek <info@nevma.gr>\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: nvm-donor.php:162
+msgid "Sorry, but this plugin requires the WooCommerce plugin to be active."
+msgstr "Συγνώμη, αλλά αυτό το πρόσθετο απαιτεί το WooCommerce να είναι ενεργό."
+
+#: nvm-donor.php:164
+msgid "Return to Plugins."
+msgstr "Επιστροφή στα Πρόσθετα."
+
+#: classes/class-product-donor.php:82
+msgid "Donor Product"
+msgstr "Προϊόν Δωρητή"
+
+#: classes/class-product-donor.php:103
+msgid "Donation Options"
+msgstr "Επιλογές Δωρεάς"
+
+#: classes/class-product-donor.php:108
+msgid "Price Α"
+msgstr "Τιμή Α"
+
+#: classes/class-product-donor.php:117
+msgid "Price B"
+msgstr "Τιμή Β"
+
+#: classes/class-product-donor.php:126
+msgid "Price C"
+msgstr "Τιμή Γ"
+
+#: classes/class-product-donor.php:135
+msgid "Price D"
+msgstr "Τιμή Δ"
+
+#: classes/class-product-donor.php:145
+msgid "Texts after the Donation"
+msgstr "Κείμενα μετά τη Δωρεά"
+
+#: classes/class-product-donor.php:146
+msgid "Optional message from the donor."
+msgstr "Προαιρετικό μήνυμα από τον δωρητή."
+
+#: classes/class-product-donor.php:148
+msgid "Enter a message for the donation..."
+msgstr "Εισάγετε ένα μήνυμα για τη δωρεά..."
+
+#: classes/class-product-donor.php:155
+msgid "Minimum Donation Amount"
+msgstr "Ελάχιστο Ποσό Δωρεάς"
+
+#: classes/class-product-donor.php:156
+msgid "Set the minimum donation amount."
+msgstr "Ορίστε το ελάχιστο ποσό δωρεάς."
+
+#: classes/class-product-donor.php:273
+msgid "We are sorry, but you can only have one Donation in your cart. View your cart <a href=\"%s\">εδώ</a>."
+msgstr "Συγνώμη, αλλά μπορείτε να έχετε μόνο μία Δωρεά στο καλάθι σας. Δείτε το καλάθι σας <a href=\"%s\">εδώ</a>."
+
+#: classes/class-product-view.php:133
+msgid "INDIVIDUAL"
+msgstr "ΙΔΙΩΤΗΣ"
+
+#: classes/class-product-view.php:134
+msgid "CORPORATE"
+msgstr "ΕΤΑΙΡΕΙΑ"
+
+#: classes/class-product-view.php:135
+msgid "IN MEMORY"
+msgstr "ΕΙΣ ΜΝΗΜΗ"
+
+#: classes/class-product-view.php:186
+msgid "Other Amount"
+msgstr "Άλλο Ποσό"
+
+#: classes/class-product-view.php:207
+msgid "Add the Amount / Minimum"
+msgstr "Προσθέστε το Ποσό / Ελάχιστο"
+
+#: classes/class-product-view.php:221
+msgid "Company Information"
+msgstr "Πληροφορίες Εταιρείας"
+
+#: classes/class-product-view.php:227
+msgid "Company Name"
+msgstr "Όνομα Εταιρείας"
+
+#: classes/class-product-view.php:237
+msgid "Tax ID (AFM)"
+msgstr "ΑΦΜ"
+
+#: classes/class-product-view.php:247
+msgid "Tax Office (DOY)"
+msgstr "ΔΟΥ"
+
+#: classes/class-product-view.php:257
+msgid "Headquarters Address"
+msgstr "Διεύθυνση Έδρας"
+
+#: classes/class-product-view.php:263
+msgid "Donor Information"
+msgstr "Πληροφορίες Δωρητή"
+
+#: classes/class-product-view.php:264
+msgid "Company Representative Information"
+msgstr "Πληροφορίες Εκπροσώπου Εταιρείας"
+
+#: classes/class-product-view.php:265
+msgid "\"In Memory\" Donation Information"
+msgstr "Πληροφορίες Δωρεάς \"Εις Μνήμη\""
+
+#: classes/class-product-view.php:271
+msgid "email"
+msgstr "email"
+
+#: classes/class-product-view.php:281
+msgid "First Name"
+msgstr "Όνομα"
+
+#: classes/class-product-view.php:290
+msgid "Last Name"
+msgstr "Επώνυμο"
+
+#: classes/class-product-view.php:300
+msgid "Address"
+msgstr "Διεύθυνση"
+
+#: classes/class-product-view.php:313
+msgid "City"
+msgstr "Πόλη"
+
+#: classes/class-product-view.php:326
+msgid "Postal Code"
+msgstr "Ταχυδρομικός Κώδικας"
+
+#: classes/class-product-view.php:339
+msgid "Phone Number"
+msgstr "Τηλέφωνο"
+
+#: classes/class-product-view.php:350
+msgid "Full name of the deceased"
+msgstr "Πλήρες όνομα του αποθανόντος"
+
+#: classes/class-product-view.php:360
+msgid "Do you wish to notify someone"
+msgstr "Θέλετε να ειδοποιήσετε κάποιον"
+
+#: classes/class-product-view.php:370
+msgid "Name of the deceased's relative"
+msgstr "Όνομα του συγγενούς του αποθανόντος"
+
+#: classes/class-product-view.php:380
+msgid "Message"
+msgstr "Μήνυμα"
+
+#: classes/class-product-view.php:390
+msgid "Would you like to notify the relative?"
+msgstr "Θέλετε να ειδοποιήσετε τον συγγενή;"
+
+#: classes/class-product-view.php:402
+msgid "Relative's First Name"
+msgstr "Όνομα Συγγενούς"
+
+#: classes/class-product-view.php:412
+msgid "Relative's Last Name"
+msgstr "Επώνυμο Συγγενούς"
+
+#: classes/class-product-view.php:422
+msgid "Relative's Email"
+msgstr "Email Συγγενούς"
+
+#: classes/class-product-view.php:432
+msgid "Is the \"In Memory\" donation made on behalf of a company?"
+msgstr "Η δωρεά \"Εις Μνήμη\" γίνεται εκ μέρους εταιρείας;"
+
+#: classes/class-product-view.php:446
+msgid "Company Name"
+msgstr "Όνομα Εταιρείας"
+
+#: classes/class-product-view.php:456
+msgid "Tax ID (AFM)"
+msgstr "ΑΦΜ"
+
+#: classes/class-product-view.php:466
+msgid "Tax Office (DOY)"
+msgstr "ΔΟΥ"
+
+#: classes/class-product-view.php:476
+msgid "Headquarters Address"
+msgstr "Διεύθυνση Έδρας"
+
+#: classes/class-product-view.php:502
+msgid "Complete Donation"
+msgstr "Ολοκλήρωση Δωρεάς"
+
+#: classes/class-product-view.php:610
+msgid "Please add a payment amount (minimum %s€)."
+msgstr "Παρακαλώ προσθέστε ένα ποσό πληρωμής (ελάχιστο %s€)."
+
+#: classes/class-product-view.php:1032
+msgid "The field \"%s\" is required."
+msgstr "Το πεδίο \"%s\" είναι υποχρεωτικό."
+
+#: classes/class-product-view.php:1064
+msgid "Email is required."
+msgstr "Το email είναι υποχρεωτικό."
+
+#: classes/class-product-view.php:1065
+msgid "Name is required."
+msgstr "Το όνομα είναι υποχρεωτικό."
+
+#: classes/class-product-view.php:1066
+msgid "Surname is required."
+msgstr "Το επώνυμο είναι υποχρεωτικό."
+
+#: classes/class-product-view.php:1190
+msgid "Τύπος Δωρεάς"
+msgstr "Τύπος Δωρεάς"
+
+#: classes/class-product-view.php:1191
+msgid "Όνομα Επιστολής"
+msgstr "Όνομα Επιστολής"
+
+#: classes/class-product-view.php:1192
+msgid "Επώνυμο Επιστολής"
+msgstr "Επώνυμο Επιστολής"
+
+#: classes/class-product-view.php:1193
+msgid "Θέση Επιστολής"
+msgstr "Θέση Επιστολής"
+
+#: classes/class-product-view.php:1194
+msgid "Email Επιστολής"
+msgstr "Email Επιστολής"
+
+#: classes/class-product-view.php:1195
+msgid "Email Δωρητή"
+msgstr "Email Δωρητή"
+
+#: classes/class-product-view.php:1196
+msgid "Όνομα Δωρητή"
+msgstr "Όνομα Δωρητή"
+
+#: classes/class-product-view.php:1197
+msgid "Επώνυμο Δωρητή"
+msgstr "Επώνυμο Δωρητή"
+
+#: classes/class-product-view.php:1198
+msgid "Διεύθυνση Δωρητή"
+msgstr "Διεύθυνση Δωρητή"
+
+#: classes/class-product-view.php:1199
+msgid "Πόλη Δωρητή"
+msgstr "Πόλη Δωρητή"
+
+#: classes/class-product-view.php:1200
+msgid "Ταχυδρομικός Κώδικας Δωρητή"
+msgstr "Ταχυδρομικός Κώδικας Δωρητή"
+
+#: classes/class-product-view.php:1201
+msgid "Τηλέφωνο Δωρητή"
+msgstr "Τηλέφωνο Δωρητή"
+
+#: classes/class-product-view.php:1202
+msgid "Όνομα Αποθανόντος"
+msgstr "Όνομα Αποθανόντος"
+
+#: classes/class-product-view.php:1203
+msgid "Συγγένεια Αποθανόντος"
+msgstr "Συγγένεια Αποθανόντος"
+
+#: classes/class-product-view.php:1204
+msgid "Μήνυμα Αποθανόντος"
+msgstr "Μήνυμα Αποθανόντος"
+
+#: classes/class-product-view.php:1205
+msgid "Εταιρεία Τιμολογίου"
+msgstr "Εταιρεία Τιμολογίου"
+
+#: classes/class-product-view.php:1206
+msgid "ΑΦΜ Τιμολογίου"
+msgstr "ΑΦΜ Τιμολογίου"
+
+#: classes/class-product-view.php:1207
+msgid "ΔΟΥ Τιμολογίου"
+msgstr "ΔΟΥ Τιμολογίου"
+
+#: classes/class-product-view.php:1208
+msgid "Διεύθυνση Τιμολογίου"
+msgstr "Διεύθυνση Τιμολογίου"
+
+#: classes/class-product-view.php:1209
+msgid "Ποσό Δωρεάς"
+msgstr "Ποσό Δωρεάς"
+
+#: classes/class-product-view.php:1210
+msgid "Όνομα Δωρεάς εις μνήμη"
+msgstr "Όνομα Δωρεάς εις μνήμη"
+
+#: classes/class-product-view.php:1211
+msgid "ΑΦΜ Δωρεάς εις μνήμη"
+msgstr "ΑΦΜ Δωρεάς εις μνήμη"
+
+#: classes/class-product-view.php:1212
+msgid "ΔΟΥ Δωρεάς εις μνήμη"
+msgstr "ΔΟΥ Δωρεάς εις μνήμη"
+
+#: classes/class-product-view.php:1213
+msgid "Διεύθυνση Δωρεάς εις μνήμη"
+msgstr "Διεύθυνση Δωρεάς εις μνήμη"
+
+#: classes/class-product-view.php:1214
+msgid "Όνομα συγγενούς"
+msgstr "Όνομα συγγενούς"
+
+#: classes/class-product-view.php:1215
+msgid "Επώνυμο συγγενούς"
+msgstr "Επώνυμο συγγενούς"
+
+#: classes/class-product-view.php:1216
+msgid "Email συγγενούς"
+msgstr "Email συγγενούς"
+
+#: classes/class-product-view.php:1377
+msgid "Product ID is required"
+msgstr "Απαιτείται το ID του προϊόντος"
+
+#: classes/class-product-view.php:1384
+msgid "Invalid donor product"
+msgstr "Μη έγκυρο προϊόν δωρητή"
+
+#: classes/class-product-view.php:1436
+msgid "Complete Donation"
+msgstr "Ολοκλήρωση Δωρεάς"
+
+#: classes/class-product-view.php:1462
+msgid "Ευχαριστούμε πολύ, για να ολοκληρώσετε τη δωρεά σας παρακαλούμε προχωρήστε σε κατάθεση σε έναν από τους παρακάτω τραπεζικούς λογαριασμούς."
+msgstr "Ευχαριστούμε πολύ, για να ολοκληρώσετε τη δωρεά σας παρακαλούμε προχωρήστε σε κατάθεση σε έναν από τους παρακάτω τραπεζικούς λογαριασμούς."
+
+#: classes/class-product-view.php:1466
+msgid "Σας ευχαριστούμε. Έχουμε λάβει την Δωρεά σας."
+msgstr "Σας ευχαριστούμε. Έχουμε λάβει την Δωρεά σας."

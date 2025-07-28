@@ -112,6 +112,9 @@ class Donor {
 		// Declare HPOS Compability
 		add_action( 'before_woocommerce_init', array( $this, 'declare_hpos_compatibility' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_donor_script' ), 10 );
+
+		// Load text domain for translations
+		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 	}
 
 	/**
@@ -160,7 +163,7 @@ class Donor {
 		if ( ! class_exists( 'WooCommerce' ) ) {
 			// Display an admin error message and terminate the script.
 			wp_die(
-				esc_html__( 'Sorry, but this plugin requires the WooCommerce plugin to be active.', 'your-text-domain' ) .
+				esc_html__( 'Sorry, but this plugin requires the WooCommerce plugin to be active.', 'nevma-donor' ) .
 				' <a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' .
 				esc_html__( 'Return to Plugins.', 'nevma-donor' ) . '</a>'
 			);
@@ -209,7 +212,7 @@ class Donor {
 	}
 
 	/**
-	 * Φόρτωση των μεταφράσεων
+	 * Load plugin textdomain for translations.
 	 */
 	public function load_plugin_textdomain() {
 		load_plugin_textdomain(

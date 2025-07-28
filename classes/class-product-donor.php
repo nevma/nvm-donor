@@ -271,7 +271,7 @@ class Product_Donor extends WC_Product_Simple {
 				$cart_product = $cart_item['data'];
 				if ( $cart_product && 'donor' === $cart_product->get_type() ) {
 					wc_add_notice(
-						__( 'We are sorry, but you can only have one Donation in your cart. View your cart <a href="' . wc_get_cart_url() . '">εδώ</a>.', 'nevma' ),
+						__( 'We are sorry, but you can only have one Donation in your cart. View your cart <a href="' . wc_get_cart_url() . '">εδώ</a>.', 'nevma-donor' ),
 						'error'
 					);
 					return false;
