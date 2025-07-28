@@ -608,7 +608,7 @@ class Product_View {
 
 				if (donationChoice === 'custom') {
 					if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 1) {
-						alert(<?php __('Please add a payment amount (minimum ' . $minimum . '€).', 'nevma-donor'); ?>);
+						alert(<?php __( 'Please add a payment amount (minimum ' . $minimum . '€).', 'nevma-donor' ); ?>);
 						return false;
 					}
 				}
@@ -1270,6 +1270,13 @@ class Product_View {
 		if ( $this->product_is_donor( $product ) ) {
 			// Get the checkout URL
 			$checkout_url = wc_get_checkout_url();
+			$cart_url     = wc_get_cart_url();
+
+			// if they are more than 1 product in the cart then redirect to the checkout page
+			if ( WC()->cart->get_cart_contents_count() > 1 ) {
+				wp_safe_redirect( $cart_url );
+				exit;
+			}
 
 			// Redirect to the checkout page
 			wp_safe_redirect( $checkout_url );
