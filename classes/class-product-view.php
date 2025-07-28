@@ -597,14 +597,35 @@ class Product_View {
 				}
 			}
 
-			// if the input[name="nvm_radio_choice"]:checked isn't checked then make input[name="donation_amount"] deactivated
 			document.addEventListener('DOMContentLoaded', function () {
-				const radioChoice = document.querySelector('input[name="nvm_radio_choice"]:checked');
-				const donationAmount = document.getElementById('donation_amount');
-				if (!radioChoice) {
-					donationAmount.disabled = true;
-				}
+				const radios = document.querySelectorAll('input[name="nvm_radio_choice"]');
+				radios.forEach(function(radio) {
+					radio.addEventListener('change', nvm_checkRadioChoice);
+				});
+				nvm_checkRadioChoice();
 			});
+
+			function nvm_checkRadioChoice() {
+				const customAmountField = document.getElementById('donation_amount');
+
+				if (!customAmountField) {
+					console.warn('donation_amount field not found');
+					return;
+				}
+
+				const radioChoice = document.querySelector('input[name="nvm_radio_choice"]:checked');
+
+				if (radioChoice) {
+					if (radioChoice.value === 'custom') {
+						customAmountField.disabled = false;
+						customAmountField.classList.remove('disabled');
+					} else {
+						customAmountField.disabled = true;
+						customAmountField.classList.add('disabled');
+						customAmountField.value = '';
+					}
+				}
+			}
 
 			/**
 			 * Validate the donation amount before proceeding
