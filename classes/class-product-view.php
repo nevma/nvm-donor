@@ -57,8 +57,10 @@ class Product_View {
 		// Add shortcode
 		add_shortcode( 'nvm_donor_form', array( $this, 'donor_form_shortcode' ) );
 
-		// Change place order button text
-		add_filter( 'woocommerce_order_button_text', array( $this, 'change_place_order_button_text' ) );
+		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'nvm_thank_you_message_for_donor' ), 10, 2 );
+
+		add_action( 'template_redirect', array( $this, 'nvm_start_html_replacement_buffer' ) );
+		add_filter( 'gettext', array( $this, 'nvm_change_woocommerce_terms_error_message' ), 20, 3 );
 	}
 
 	/**
@@ -72,6 +74,10 @@ class Product_View {
 
 		global $product;
 
+		if ( ! $this->product_is_donor( $product ) ) {
+			return;
+		}
+
 		do_action( 'woocommerce_before_add_to_cart_form' );
 
 		?>
@@ -82,6 +88,8 @@ class Product_View {
 				<button type="submit" name="add-to-cart" value="<?php echo esc_attr( $product->get_id() ); ?>" class="single_add_to_cart_button button alt"><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
 
 				<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
+
+				<?php wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' ); ?>
 			</form>
 
 			<?php $this->add_content_after_addtocart_button( $product ); ?>
@@ -386,6 +394,8 @@ class Product_View {
 			)
 		);
 
+		echo '<div class="epistoli-fields">';
+
 		woocommerce_form_field(
 			'nvm_epistoli_name',
 			array(
@@ -426,6 +436,10 @@ class Product_View {
 			)
 		);
 
+		echo '</div>';
+
+		echo '<div class="memoriam-invoice-fields">';
+
 		woocommerce_form_field(
 			'nvm_memoriam_invoice_name',
 			array(
@@ -460,7 +474,7 @@ class Product_View {
 			'nvm_memoriam_invoice_address',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Διεύθυνση Εδρας', 'nevma' ),
+				'label'    => __( 'Διεύθυνση Έδρας', 'nevma' ),
 				'required' => true,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
@@ -468,7 +482,9 @@ class Product_View {
 
 		echo '</div>';
 
-		wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
+		echo '</div>';
+
+		// wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 	}
 
 	/**
@@ -523,7 +539,6 @@ class Product_View {
 		echo '<button id="second-step-back" type="button" onclick="nvm_prevStep()"><< Προηγούμενο</button>';
 		$this->get_donor_details();
 		echo '</div>';
-		echo wp_nonce_field( 'donation_form_nonce', 'donation_form_nonce_field' );
 
 		?>
 		<script>
@@ -761,7 +776,9 @@ class Product_View {
 			.donor-box #nvm_dead_field,
 			.donor-box #nvm_dead_name_field,
 			.donor-company-title,
-			.donor-memoriam-title{
+			.donor-memoriam-title,
+			.donor-box .epistoli-fields,
+			.donor-box .memoriam-invoice-fields{
 				display:none;
 			}
 
@@ -816,7 +833,9 @@ class Product_View {
 			.donor-box .donor-memoriam .donor-memoriam-title,
 			.donor-box .donor-memoriam #nvm_memoriam_invoice_field,
 			.donor-box .donor-memoriam #nvm_dead_name_field,
-			.donor-box .donor-memoriam #nvm_epistoli_field{
+			.donor-box .donor-memoriam #nvm_epistoli_field,
+			.donor-box .donor-memoriam .epistoli-fields,
+			.donor-box .donor-memoriam .memoriam-invoice-fields{
 				display:block;
 			}
 
@@ -1025,10 +1044,11 @@ class Product_View {
 	 */
 	public function save_donation_data( $cart_item_data, $product_id ) {
 
-		if ( isset( $_POST['donation_form_nonce_field'] ) && ! wp_verify_nonce( $_POST['donation_form_nonce_field'], 'donation_form_nonce' ) ) {
-			wc_add_notice( __( 'Η επαλήθευση του nonce απέτυχε. Παρακαλώ δοκιμάστε ξανά.', 'nevma' ), 'error' );
-			return $cart_item_data;
-		}
+		// if ( isset( $_POST['donation_form_nonce_field'] ) && ! wp_verify_nonce( $_POST['donation_form_nonce_field'], 'donation_form_nonce' ) ) {
+
+		// wc_add_notice( __( 'Η επαλήθευση του nonce απέτυχε. Παρακαλώ δοκιμάστε ξανά.', 'nevma' ), 'error' );
+		// return $cart_item_data;
+		// }
 
 		if ( ! isset( $_POST['type_of_donation'] ) ) {
 			return $cart_item_data;
@@ -1238,6 +1258,10 @@ class Product_View {
 
 	public function redirect_to_checkout_for_specific_product( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
 
+		// add a error statement
+		error_log( __METHOD__ );
+		error_log( print_r( $cart_item_key, true ) );
+
 		// Target specific product for donations.
 		$product = wc_get_product( $product_id );
 
@@ -1300,11 +1324,12 @@ class Product_View {
 
 				// Remove billing fields we don't need
 				unset( $fields['billing'] );
+
+				// Remove order comments/additional information field
+				unset( $fields['order']['order_comments'] );
+
 			}
 		}
-
-		// Remove order comments/additional information field
-		unset( $fields['order']['order_comments'] );
 
 		return $fields;
 	}
@@ -1361,7 +1386,8 @@ class Product_View {
 		// Capture the output of the donation form.
 		ob_start();
 		echo '<div class="container-donor-box">';
-		echo $this->add_donation_carts( $product );
+		$this->add_donation_carts( $product );
+		// echo nonce field
 		echo '</div>';
 		// Add the add to cart button
 		return ob_get_clean();
@@ -1386,30 +1412,160 @@ class Product_View {
 	}
 
 	/**
-	 * Change the place order button text on checkout
+	 * Change the visible <h1> title on the checkout page if donor product is in cart.
 	 *
-	 * @return string Modified button text
+	 * @param string $title The current post/page title.
+	 * @param int    $post_id The ID of the post.
+	 * @return string The modified title.
 	 */
-	public function change_place_order_button_text() {
-		// Only proceed if we're on the checkout page
-		if ( ! is_checkout() ) {
-			return __( 'Ολοκλήρωση Πληρωμής', 'nevma' );
+	public function nvm_change_checkout_title_h1( $title, $post_id ) {
+		if ( ! is_checkout() || is_wc_endpoint_url() || ! WC() || ! WC()->cart || WC()->cart->is_empty() ) {
+			return $title;
 		}
 
-		// Check if cart exists and is not empty
-		if ( ! WC() || ! WC()->cart || WC()->cart->is_empty() ) {
-			return __( 'Ολοκλήρωση Πληρωμής', 'nevma' );
-		}
+		foreach ( WC()->cart->get_cart() as $item ) {
 
-		// Check if any cart item is a donor product
-		foreach ( WC()->cart->get_cart() as $cart_item ) {
-			$product = $cart_item['data'];
-			if ( $product && $this->product_is_donor( $product ) ) {
-				return __( 'Ολοκλήρωση Δωρεάς', 'nevma' );
+			$product_id = $item['product_id'];
+			$product    = wc_get_product( $product_id );
+
+			if ( $this->product_is_donor( $product ) ) {
+				// Optional: Confirm it's the checkout page object
+				$checkout_page_id = wc_get_page_id( 'checkout' );
+				if ( intval( $post_id ) === $checkout_page_id ) {
+					return __( 'Ολοκλήρωση Δωρεάς', 'nevma' );
+				}
 			}
 		}
 
-		// Default text if no donor products found
-		return __( 'Ολοκλήρωση Πληρωμής', 'nevma' );
+		return $title;
+	}
+
+	/**
+	 * Change thank you message if donor product is in the order.
+	 *
+	 * @param string   $text Original thank you text.
+	 * @param WC_Order $order WooCommerce order object.
+	 * @return string
+	 */
+	public function nvm_thank_you_message_for_donor( $text, $order ) {
+		if ( ! $order || is_wp_error( $order ) ) {
+			return $text;
+		}
+
+		foreach ( $order->get_items() as $item ) {
+			$product = $item->get_product();
+			if ( $this->product_is_donor( $product ) ) {
+
+				// if payment method is bank then return the thank you message
+				if ( $order->get_payment_method() === 'bacs' ) {
+					return __( 'Ευχαριστούμε πολύ, για να ολοκληρώσετε τη δωρεά σας παρακαλούμε προχωρήστε σε κατάθεση σε έναν από τους παρακάτω τραπεζικούς λογαριασμούς.', 'nevma' );
+				}
+
+				if ( $order->get_payment_method() !== 'bacs' ) {
+					return __( 'Σας ευχαριστούμε. Έχουμε λάβει την Δωρεά σας.', 'nevma' );
+				}
+			}
+		}
+
+		return $text;
+	}
+
+	public function nvm_start_html_replacement_buffer() {
+
+		if ( ! is_admin() ) {
+			// if is thank you page or checkout page
+			if ( is_wc_endpoint_url( 'order-received' ) || is_checkout() ) {
+				ob_start( array( $this, 'nvm_apply_html_replacements' ) );
+			}
+		}
+	}
+
+	public function nvm_apply_html_replacements( $html ) {
+
+		// if is thank you page then get the order id and check if it contains a donor product
+		if ( is_wc_endpoint_url( 'order-received' ) ) {
+			$order_id = wc_get_order_id_by_order_key( sanitize_text_field( $_GET['key'] ) );
+			$order    = wc_get_order( $order_id );
+			if ( $order ) {
+				foreach ( $order->get_items() as $item ) {
+					$product = $item->get_product();
+					if ( $this->product_is_donor( $product ) ) {
+
+						$html = $this->nvm_replace_words_in_html( $html );
+
+						return $html;
+					}
+				}
+			}
+		}
+
+		// if is checkout page then check if the cart contains a donor product
+		if ( is_checkout() ) {
+			if ( WC() && WC()->cart ) {
+				foreach ( WC()->cart->get_cart() as $cart_item ) {
+					$product = $cart_item['data'];
+					if ( $this->product_is_donor( $product ) ) {
+
+						$html = $this->nvm_replace_words_in_html( $html );
+
+						return $html;
+					}
+				}
+			}
+		}
+
+		return $html;
+	}
+
+	public function nvm_replace_words_in_html( $html ) {
+		$html = str_replace( 'παραγγελία', 'Δωρεά', $html );
+		$html = str_replace( 'Ολοκλήρωση Πληρωμής', 'Ολοκλήρωση Δωρεάς', $html );
+		return $html;
+	}
+
+	/**
+	 * Change WooCommerce error message for terms and conditions when a donor product is in the cart.
+	 *
+	 * @param string $translated_text The translated text.
+	 * @param string $text            Original text.
+	 * @param string $domain          Text domain.
+	 *
+	 * @return string
+	 */
+	public function nvm_change_woocommerce_terms_error_message( $translated_text, $text, $domain ) {
+		// Apply only on frontend and only if cart is initialized.
+		if ( is_admin() || ! did_action( 'woocommerce_loaded' ) || ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
+			return $translated_text;
+		}
+
+		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			return $translated_text;
+		}
+
+		// Defensive: avoid fatal error if method doesn't exist
+		if ( ! method_exists( $this, 'product_is_donor' ) ) {
+			return $translated_text;
+		}
+
+		// Early return if no donor product is found
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$product = $cart_item['data'];
+			if ( $this->product_is_donor( $product ) ) {
+				if ( $domain === 'woocommerce' ) {
+					if ( $text === 'Please read and accept the terms and conditions to proceed with your order.' ) {
+						return 'Παρακαλούμε διαβάστε και αποδεχτείτε τους όρους και προϋποθέσεις για να συνεχίσετε με τη Δωρεά σας.';
+					}
+
+					if ( $text === 'Παρακαλούμε διαβάστε και αποδεχτείτε τους όρους και προϋποθέσεις' ) {
+						return 'Παρακαλούμε διαβάστε και αποδεχτείτε τους όρους και προϋποθέσεις για να συνεχίσετε με τη Δωρεά σας.';
+					}
+				}
+
+				// only return on first match
+				break;
+			}
+		}
+
+		return $translated_text;
 	}
 }

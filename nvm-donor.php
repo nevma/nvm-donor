@@ -4,7 +4,7 @@
  * Plugin Name: WooCommerce Donor plugin by Nevma
  * Plugin URI:
  * Description: A plugin to handle donations via WooCommerce by nevma team. Compatible with WooCommerce block checkout
- * Version: 1.1.2
+ * Version: 1.1.4
  * Author: Nevma Team
  * Author URI: https://woocommerce.com/vendor/nevma/
  * Text Domain: nevma
@@ -93,7 +93,7 @@ class Donor {
 	public function __construct() {
 
 		// Set the plugin version.
-		self::$plugin_version = '1.0.3';
+		self::$plugin_version = '1.1.4';
 
 		// Set the plugin namespace.
 		self::$namespace_prefix = 'Nvm\\Donor';
