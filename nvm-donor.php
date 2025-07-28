@@ -162,7 +162,7 @@ class Donor {
 			wp_die(
 				esc_html__( 'Sorry, but this plugin requires the WooCommerce plugin to be active.', 'your-text-domain' ) .
 				' <a href="' . esc_url( admin_url( 'plugins.php' ) ) . '">' .
-				esc_html__( 'Return to Plugins.', 'nevma' ) . '</a>'
+				esc_html__( 'Return to Plugins.', 'nevma-donor' ) . '</a>'
 			);
 		}
 	}
@@ -213,7 +213,7 @@ class Donor {
 	 */
 	public function load_plugin_textdomain() {
 		load_plugin_textdomain(
-			'nevma',
+			'nevma-donor',
 			false,
 			dirname( plugin_basename( __FILE__ ) ) . '/languages'
 		);

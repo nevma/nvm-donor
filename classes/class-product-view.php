@@ -131,9 +131,9 @@ class Product_View {
 		$chosen = empty( $chosen ) ? 'individual' : $chosen;
 
 		$options = array(
-			'individual' => __( 'INDIVIDUAL', 'nevma' ),
-			'corporate'  => __( 'CORPORATE', 'nevma' ),
-			'memoriam'   => __( 'IN MEMORY', 'nevma' ),
+			'individual' => __( 'INDIVIDUAL', 'nevma-donor' ),
+			'corporate'  => __( 'CORPORATE', 'nevma-donor' ),
+			'memoriam'   => __( 'IN MEMORY', 'nevma-donor' ),
 		);
 
 		$args = array(
@@ -184,7 +184,7 @@ class Product_View {
 			);
 		}
 
-		$options['custom'] = esc_html__( 'Other Amount', 'nevma' );
+		$options['custom'] = esc_html__( 'Other Amount', 'nevma-donor' );
 
 		$args = array(
 			'type'    => 'radio',
@@ -202,16 +202,16 @@ class Product_View {
 			'donation_amount',
 			array(
 				'type'              => 'number',
-				// 'label'             => __( 'Ποσό Δωρεάς σε ευρώ', 'nevma' ),
+				// 'label'             => __( 'Ποσό Δωρεάς σε ευρώ', 'nevma-donor' ),
 				'required'          => false,
 				'class'             => array( 'form-row-wide' ),
-				'placeholder'       => __( 'Add the Amount / Minimum', 'nevma' ) . ' ' . $minimum . ' (€)',
+				'placeholder'       => __( 'Add the Amount / Minimum', 'nevma-donor' ) . ' ' . $minimum . ' (€)',
 				'custom_attributes' => array(
 					'min' => $minimum,
 				),
 			)
 		);
-		// echo '<span>' . __( 'Minimun Amount:', 'nevma' ) . ' ' . $minimum . '€</span>';
+		// echo '<span>' . __( 'Minimun Amount:', 'nevma-donor' ) . ' ' . $minimum . '€</span>';
 		echo '</div>';
 	}
 
@@ -219,13 +219,13 @@ class Product_View {
 
 		echo '<div class="donation-fields">';
 
-		echo '<h4 class="donor-company-title">' . __( 'Company Information', 'nevma' ) . '</h4>';
+		echo '<h4 class="donor-company-title">' . __( 'Company Information', 'nevma-donor' ) . '</h4>';
 
 		woocommerce_form_field(
 			'nvm_company_name',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Company Name', 'nevma' ),
+				'label'    => __( 'Company Name', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'timologio' ),
 			)
@@ -235,7 +235,7 @@ class Product_View {
 			'nvm_company_afm',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Tax ID (AFM)', 'nevma' ),
+				'label'    => __( 'Tax ID (AFM)', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-first', 'timologio' ),
 			)
@@ -245,7 +245,7 @@ class Product_View {
 			'nvm_company_doy',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Tax Office (DOY)', 'nevma' ),
+				'label'    => __( 'Tax Office (DOY)', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-last', 'timologio' ),
 			)
@@ -255,21 +255,21 @@ class Product_View {
 			'nvm_company_address',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Headquarters Address', 'nevma' ),
+				'label'    => __( 'Headquarters Address', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'timologio' ),
 			)
 		);
 
-		echo '<h4 class="donor-simple-title">' . __( 'Donor Information', 'nevma' ) . '</h4>';
-		echo '<h4 class="donor-company-title">' . __( 'Company Representative Information', 'nevma' ) . '</h4>';
-		echo '<h4 class="donor-memoriam-title">' . __( '"In Memory" Donation Information', 'nevma' ) . '</h4>';
+		echo '<h4 class="donor-simple-title">' . __( 'Donor Information', 'nevma-donor' ) . '</h4>';
+		echo '<h4 class="donor-company-title">' . __( 'Company Representative Information', 'nevma-donor' ) . '</h4>';
+		echo '<h4 class="donor-memoriam-title">' . __( '"In Memory" Donation Information', 'nevma-donor' ) . '</h4>';
 
 		woocommerce_form_field(
 			'nvm_email',
 			array(
 				'type'     => 'email',
-				'label'    => __( 'email', 'nevma' ),
+				'label'    => __( 'email', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-wide', 'common' ),
 			)
@@ -279,7 +279,7 @@ class Product_View {
 			'nvm_name',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'First Name', 'nevma' ),
+				'label'    => __( 'First Name', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-first', 'common' ),
 			)
@@ -288,7 +288,7 @@ class Product_View {
 			'nvm_surname',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Last Name', 'nevma' ),
+				'label'    => __( 'Last Name', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-last', 'common' ),
 			)
@@ -298,7 +298,7 @@ class Product_View {
 			'nvm_address',
 			array(
 				'type'              => 'text',
-				'label'             => __( 'Address', 'nevma' ),
+				'label'             => __( 'Address', 'nevma-donor' ),
 				'required'          => true,
 				'custom_attributes' => array(
 					'data-conditional-required' => 'true',
@@ -311,7 +311,7 @@ class Product_View {
 			'nvm_town',
 			array(
 				'type'              => 'text',
-				'label'             => __( 'City', 'nevma' ),
+				'label'             => __( 'City', 'nevma-donor' ),
 				'required'          => true,
 				'custom_attributes' => array(
 					'data-conditional-required' => 'true',
@@ -324,7 +324,7 @@ class Product_View {
 			'nvm_postal',
 			array(
 				'type'              => 'text',
-				'label'             => __( 'Postal Code', 'nevma' ),
+				'label'             => __( 'Postal Code', 'nevma-donor' ),
 				'required'          => true,
 				'custom_attributes' => array(
 					'data-conditional-required' => 'true',
@@ -337,7 +337,7 @@ class Product_View {
 			'nvm_telephone',
 			array(
 				'type'     => 'tel',
-				'label'    => __( 'Phone Number', 'nevma' ),
+				'label'    => __( 'Phone Number', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-wide', 'common' ),
 
@@ -348,7 +348,7 @@ class Product_View {
 			'nvm_dead_name',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Full name of the deceased', 'nevma' ),
+				'label'    => __( 'Full name of the deceased', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
@@ -358,7 +358,7 @@ class Product_View {
 			'nvm_dead',
 			array(
 				'type'     => 'checkbox',
-				'label'    => __( 'Do you wish to notify someone', 'nevma' ),
+				'label'    => __( 'Do you wish to notify someone', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide' ),
 			)
@@ -368,7 +368,7 @@ class Product_View {
 			'nvm_dead_relative',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Name of the deceased\'s relative', 'nevma' ),
+				'label'    => __( 'Name of the deceased\'s relative', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide' ),
 			)
@@ -378,7 +378,7 @@ class Product_View {
 			'nvm_dead_message',
 			array(
 				'type'     => 'textarea',
-				'label'    => __( 'Message', 'nevma' ),
+				'label'    => __( 'Message', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
@@ -388,7 +388,7 @@ class Product_View {
 			'nvm_epistoli',
 			array(
 				'type'     => 'checkbox',
-				'label'    => __( 'Would you like to notify the relative?', 'nevma' ),
+				'label'    => __( 'Would you like to notify the relative?', 'nevma-donor' ),
 				'required' => false,
 				'class'    => array( 'form-row-wide', 'company' ),
 			)
@@ -400,7 +400,7 @@ class Product_View {
 			'nvm_epistoli_name',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Relative\'s First Name', 'nevma' ),
+				'label'    => __( 'Relative\'s First Name', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-first', 'epistoli' ),
 			)
@@ -410,7 +410,7 @@ class Product_View {
 			'nvm_epistoli_surname',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Relative\'s Last Name', 'nevma' ),
+				'label'    => __( 'Relative\'s Last Name', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-last', 'epistoli' ),
 			)
@@ -420,7 +420,7 @@ class Product_View {
 			'nvm_epistoli_email',
 			array(
 				'type'     => 'email',
-				'label'    => __( 'Relative\'s Email', 'nevma' ),
+				'label'    => __( 'Relative\'s Email', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-wide', 'epistoli' ),
 			)
@@ -430,7 +430,7 @@ class Product_View {
 			'nvm_memoriam_invoice',
 			array(
 				'type'     => 'checkbox',
-				'label'    => __( 'Is the "In Memory" donation made on behalf of a company?', 'nevma' ),
+				'label'    => __( 'Is the "In Memory" donation made on behalf of a company?', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
@@ -444,7 +444,7 @@ class Product_View {
 			'nvm_memoriam_invoice_name',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Company Name', 'nevma' ),
+				'label'    => __( 'Company Name', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
@@ -454,7 +454,7 @@ class Product_View {
 			'nvm_memoriam_invoice_afm',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Tax ID (AFM)', 'nevma' ),
+				'label'    => __( 'Tax ID (AFM)', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-first', 'memoriam' ),
 			)
@@ -464,7 +464,7 @@ class Product_View {
 			'nvm_memoriam_invoice_doy',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Tax Office (DOY)', 'nevma' ),
+				'label'    => __( 'Tax Office (DOY)', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-last', 'memoriam' ),
 			)
@@ -474,7 +474,7 @@ class Product_View {
 			'nvm_memoriam_invoice_address',
 			array(
 				'type'     => 'text',
-				'label'    => __( 'Headquarters Address', 'nevma' ),
+				'label'    => __( 'Headquarters Address', 'nevma-donor' ),
 				'required' => true,
 				'class'    => array( 'form-row-wide', 'memoriam' ),
 			)
@@ -500,7 +500,7 @@ class Product_View {
 			return $text;
 		}
 
-		return __( 'Complete Donation', 'nevma' );
+		return __( 'Complete Donation', 'nevma-donor' );
 	}
 
 	public function add_content_after_addtocart_button() {
@@ -540,7 +540,8 @@ class Product_View {
 		$this->get_donor_details();
 		echo '</div>';
 
-		$minimum = Product_Donor::get_minimum_donation_amount();
+		$minimum = Product_Donor::get_donor_minimum_amount( $product );
+
 		?>
 		<script>
 			let nvm_currentStep = 1;
@@ -607,7 +608,7 @@ class Product_View {
 
 				if (donationChoice === 'custom') {
 					if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 1) {
-						alert(<?php __('Please add a payment amount (minimum ' . $minimum . '€).', 'nevma'); ?>);
+						alert(<?php __('Please add a payment amount (minimum ' . $minimum . '€).', 'nevma-donor'); ?>);
 						return false;
 					}
 				}
@@ -1029,7 +1030,7 @@ class Product_View {
 
 		foreach ( $required_fields as $field => $error ) {
 			if ( empty( $_POST[ $field ] ) ) {
-				wc_add_notice( sprintf( __( 'The field "%s" is required.', 'nevma' ), $error ), 'error' );
+				wc_add_notice( sprintf( __( 'The field "%s" is required.', 'nevma-donor' ), $error ), 'error' );
 				$passed = false;
 			}
 		}
@@ -1047,7 +1048,7 @@ class Product_View {
 
 		// if ( isset( $_POST['donation_form_nonce_field'] ) && ! wp_verify_nonce( $_POST['donation_form_nonce_field'], 'donation_form_nonce' ) ) {
 
-		// wc_add_notice( __( 'Η επαλήθευση του nonce απέτυχε. Παρακαλώ δοκιμάστε ξανά.', 'nevma' ), 'error' );
+		// wc_add_notice( __( 'Η επαλήθευση του nonce απέτυχε. Παρακαλώ δοκιμάστε ξανά.', 'nevma-donor' ), 'error' );
 		// return $cart_item_data;
 		// }
 
@@ -1061,9 +1062,9 @@ class Product_View {
 
 			// Validate required fields.
 			$required_fields = array(
-				'nvm_email'   => __( 'Email is required.', 'nevma' ),
-				'nvm_name'    => __( 'Name is required.', 'nevma' ),
-				'nvm_surname' => __( 'Surname is required.', 'nevma' ),
+				'nvm_email'   => __( 'Email is required.', 'nevma-donor' ),
+				'nvm_name'    => __( 'Name is required.', 'nevma-donor' ),
+				'nvm_surname' => __( 'Surname is required.', 'nevma-donor' ),
 			);
 
 			foreach ( $required_fields as $field => $error_message ) {
@@ -1187,33 +1188,33 @@ class Product_View {
 	public function add_donation_to_order_items( $item, $cart_item_key, $values, $order ) {
 		// Define a list of keys you want to save to the order item.
 		$custom_keys = array(
-			'type_of_donation'         => __( 'Τύπος Δωρεάς', 'nevma' ),
-			'epistoli_name'            => __( 'Όνομα Επιστολής', 'nevma' ),
-			'epistoli_surname'         => __( 'Επώνυμο Επιστολής', 'nevma' ),
-			'epistoli_position'        => __( 'Θέση Επιστολής', 'nevma' ),
-			'epistoli_email'           => __( 'Email Επιστολής', 'nevma' ),
-			'user_email'               => __( 'Email Δωρητή', 'nevma' ),
-			'user_name'                => __( 'Όνομα Δωρητή', 'nevma' ),
-			'user_surname'             => __( 'Επώνυμο Δωρητή', 'nevma' ),
-			'user_address'             => __( 'Διεύθυνση Δωρητή', 'nevma' ),
-			'user_town'                => __( 'Πόλη Δωρητή', 'nevma' ),
-			'user_postal'              => __( 'Ταχυδρομικός Κώδικας Δωρητή', 'nevma' ),
-			'user_telephone'           => __( 'Τηλέφωνο Δωρητή', 'nevma' ),
-			'dead_name'                => __( 'Όνομα Αποθανόντος', 'nevma' ),
-			'dead_relative'            => __( 'Συγγένεια Αποθανόντος', 'nevma' ),
-			'dead_message'             => __( 'Μήνυμα Αποθανόντος', 'nevma' ),
-			'timologio_company'        => __( 'Εταιρεία Τιμολογίου', 'nevma' ),
-			'timologio_afm'            => __( 'ΑΦΜ Τιμολογίου', 'nevma' ),
-			'timologio_doy'            => __( 'ΔΟΥ Τιμολογίου', 'nevma' ),
-			'timologio_address'        => __( 'Διεύθυνση Τιμολογίου', 'nevma' ),
-			'nvm_radio_choice'         => __( 'Ποσό Δωρεάς', 'nevma' ),
-			'memoriam_invoice_name'    => __( 'Όνομα Δωρεάς εις μνήμη', 'nevma' ),
-			'memoriam_invoice_afm'     => __( 'ΑΦΜ Δωρεάς εις μνήμη', 'nevma' ),
-			'memoriam_invoice_doy'     => __( 'ΔΟΥ Δωρεάς εις μνήμη', 'nevma' ),
-			'memoriam_invoice_address' => __( 'Διεύθυνση Δωρεάς εις μνήμη', 'nevma' ),
-			'memoriam_name'            => __( 'Όνομα συγγενούς', 'nevma' ),
-			'memoriam_surname'         => __( 'Επώνυμο συγγενούς', 'nevma' ),
-			'memoriam_email'           => __( 'Email συγγενούς', 'nevma' ),
+			'type_of_donation'         => __( 'Τύπος Δωρεάς', 'nevma-donor' ),
+			'epistoli_name'            => __( 'Όνομα Επιστολής', 'nevma-donor' ),
+			'epistoli_surname'         => __( 'Επώνυμο Επιστολής', 'nevma-donor' ),
+			'epistoli_position'        => __( 'Θέση Επιστολής', 'nevma-donor' ),
+			'epistoli_email'           => __( 'Email Επιστολής', 'nevma-donor' ),
+			'user_email'               => __( 'Email Δωρητή', 'nevma-donor' ),
+			'user_name'                => __( 'Όνομα Δωρητή', 'nevma-donor' ),
+			'user_surname'             => __( 'Επώνυμο Δωρητή', 'nevma-donor' ),
+			'user_address'             => __( 'Διεύθυνση Δωρητή', 'nevma-donor' ),
+			'user_town'                => __( 'Πόλη Δωρητή', 'nevma-donor' ),
+			'user_postal'              => __( 'Ταχυδρομικός Κώδικας Δωρητή', 'nevma-donor' ),
+			'user_telephone'           => __( 'Τηλέφωνο Δωρητή', 'nevma-donor' ),
+			'dead_name'                => __( 'Όνομα Αποθανόντος', 'nevma-donor' ),
+			'dead_relative'            => __( 'Συγγένεια Αποθανόντος', 'nevma-donor' ),
+			'dead_message'             => __( 'Μήνυμα Αποθανόντος', 'nevma-donor' ),
+			'timologio_company'        => __( 'Εταιρεία Τιμολογίου', 'nevma-donor' ),
+			'timologio_afm'            => __( 'ΑΦΜ Τιμολογίου', 'nevma-donor' ),
+			'timologio_doy'            => __( 'ΔΟΥ Τιμολογίου', 'nevma-donor' ),
+			'timologio_address'        => __( 'Διεύθυνση Τιμολογίου', 'nevma-donor' ),
+			'nvm_radio_choice'         => __( 'Ποσό Δωρεάς', 'nevma-donor' ),
+			'memoriam_invoice_name'    => __( 'Όνομα Δωρεάς εις μνήμη', 'nevma-donor' ),
+			'memoriam_invoice_afm'     => __( 'ΑΦΜ Δωρεάς εις μνήμη', 'nevma-donor' ),
+			'memoriam_invoice_doy'     => __( 'ΔΟΥ Δωρεάς εις μνήμη', 'nevma-donor' ),
+			'memoriam_invoice_address' => __( 'Διεύθυνση Δωρεάς εις μνήμη', 'nevma-donor' ),
+			'memoriam_name'            => __( 'Όνομα συγγενούς', 'nevma-donor' ),
+			'memoriam_surname'         => __( 'Επώνυμο συγγενούς', 'nevma-donor' ),
+			'memoriam_email'           => __( 'Email συγγενούς', 'nevma-donor' ),
 		);
 
 		// Loop through custom keys and add them to the order item if they exist.
@@ -1374,14 +1375,14 @@ class Product_View {
 		// Validate product ID.
 		$product_id = intval( $atts['product_id'] );
 		if ( $product_id <= 0 ) {
-			return __( 'Product ID is required', 'nevma' );
+			return __( 'Product ID is required', 'nevma-donor' );
 		}
 
 		// Fetch product without affecting global $product.
 		$product = wc_get_product( $product_id );
 
 		if ( ! $product || ! $this->product_is_donor( $product ) ) {
-			return __( 'Invalid donor product', 'nevma' );
+			return __( 'Invalid donor product', 'nevma-donor' );
 		}
 
 		// Capture the output of the donation form.
@@ -1433,7 +1434,7 @@ class Product_View {
 				// Optional: Confirm it's the checkout page object
 				$checkout_page_id = wc_get_page_id( 'checkout' );
 				if ( intval( $post_id ) === $checkout_page_id ) {
-					return __( 'Complete Donation', 'nevma' );
+					return __( 'Complete Donation', 'nevma-donor' );
 				}
 			}
 		}
@@ -1459,11 +1460,11 @@ class Product_View {
 
 				// if payment method is bank then return the thank you message
 				if ( $order->get_payment_method() === 'bacs' ) {
-					return __( 'Ευχαριστούμε πολύ, για να ολοκληρώσετε τη δωρεά σας παρακαλούμε προχωρήστε σε κατάθεση σε έναν από τους παρακάτω τραπεζικούς λογαριασμούς.', 'nevma' );
+					return __( 'Ευχαριστούμε πολύ, για να ολοκληρώσετε τη δωρεά σας παρακαλούμε προχωρήστε σε κατάθεση σε έναν από τους παρακάτω τραπεζικούς λογαριασμούς.', 'nevma-donor' );
 				}
 
 				if ( $order->get_payment_method() !== 'bacs' ) {
-					return __( 'Σας ευχαριστούμε. Έχουμε λάβει την Δωρεά σας.', 'nevma' );
+					return __( 'Σας ευχαριστούμε. Έχουμε λάβει την Δωρεά σας.', 'nevma-donor' );
 				}
 			}
 		}

@@ -80,7 +80,7 @@ class Product_Donor extends WC_Product_Simple {
 	}
 
 	public static function register_donor_product_type( $types ) {
-		$types['donor'] = __( 'Donor Product', 'nvm-donor' );
+		$types['donor'] = __( 'Donor Product', 'nevma-donor' );
 		return $types;
 	}
 
@@ -101,12 +101,12 @@ class Product_Donor extends WC_Product_Simple {
 
 		echo '<div class="options_group show_if_donor">';
 
-		echo '<h4>' . esc_html__( 'Donation Options', 'nvm-donor' ) . '</h4>';
+		echo '<h4>' . esc_html__( 'Donation Options', 'nevma-donor' ) . '</h4>';
 		echo '[nvm_donor_form product_id=' . esc_attr( $post->ID ) . ']';
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_first_price',
-				'label'    => __( 'Price Α', 'nvm-donor' ),
+				'label'    => __( 'Price Α', 'nevma-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
@@ -115,7 +115,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_second_price',
-				'label'    => __( 'Price B', 'nvm-donor' ),
+				'label'    => __( 'Price B', 'nevma-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
@@ -124,7 +124,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_third_price',
-				'label'    => __( 'Price C', 'nvm-donor' ),
+				'label'    => __( 'Price C', 'nevma-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
@@ -133,7 +133,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_fourth_price',
-				'label'    => __( 'Price D', 'nvm-donor' ),
+				'label'    => __( 'Price D', 'nevma-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
@@ -143,18 +143,18 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_textarea_input(
 			array(
 				'id'          => '_donor_message',
-				'label'       => __( 'Texts after the Donation', 'nvm-donor' ),
-				'description' => __( 'Optional message from the donor.', 'nvm-donor' ),
+				'label'       => __( 'Texts after the Donation', 'nevma-donor' ),
+				'description' => __( 'Optional message from the donor.', 'nevma-donor' ),
 				'desc_tip'    => true,
-				'placeholder' => __( 'Enter a message for the donation...', 'nvm-donor' ),
+				'placeholder' => __( 'Enter a message for the donation...', 'nevma-donor' ),
 			)
 		);
 
 		woocommerce_wp_text_input(
 			array(
 				'id'                => '_donor_minimum_amount',
-				'label'             => __( 'Minimum Donation Amount', 'nvm-donor' ),
-				'description'       => __( 'Set the minimum donation amount.', 'nvm-donor' ),
+				'label'             => __( 'Minimum Donation Amount', 'nevma-donor' ),
+				'description'       => __( 'Set the minimum donation amount.', 'nevma-donor' ),
 				'type'              => 'number',
 				'desc_tip'          => true,
 				'custom_attributes' => array(
