@@ -597,6 +597,15 @@ class Product_View {
 				}
 			}
 
+			// if the input[name="nvm_radio_choice"]:checked isn't checked then make input[name="donation_amount"] deactivated
+			document.addEventListener('DOMContentLoaded', function () {
+				const radioChoice = document.querySelector('input[name="nvm_radio_choice"]:checked');
+				const donationAmount = document.getElementById('donation_amount');
+				if (!radioChoice) {
+					donationAmount.disabled = true;
+				}
+			});
+
 			/**
 			 * Validate the donation amount before proceeding
 			 * @returns {boolean}
