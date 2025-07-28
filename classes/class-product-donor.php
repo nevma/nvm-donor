@@ -101,12 +101,12 @@ class Product_Donor extends WC_Product_Simple {
 
 		echo '<div class="options_group show_if_donor">';
 
-		echo '<h4>' . esc_html__( 'Επιλογές για τις Δωρεές', 'nvm-donor' ) . '</h4>';
+		echo '<h4>' . esc_html__( 'Donation Options', 'nvm-donor' ) . '</h4>';
 		echo '[nvm_donor_form product_id=' . esc_attr( $post->ID ) . ']';
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_first_price',
-				'label'    => __( 'Τιμή Α', 'nvm-donor' ),
+				'label'    => __( 'Price Α', 'nvm-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
@@ -115,7 +115,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_second_price',
-				'label'    => __( 'Τιμή B', 'nvm-donor' ),
+				'label'    => __( 'Price B', 'nvm-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
@@ -124,7 +124,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_third_price',
-				'label'    => __( 'Τιμή Γ', 'nvm-donor' ),
+				'label'    => __( 'Price Γ', 'nvm-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
@@ -133,7 +133,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_text_input(
 			array(
 				'id'       => '_donor_fourth_price',
-				'label'    => __( 'Τιμή D', 'nvm-donor' ),
+				'label'    => __( 'Price D', 'nvm-donor' ),
 				'type'     => 'number',
 				'desc_tip' => true,
 			)
@@ -143,7 +143,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_textarea_input(
 			array(
 				'id'          => '_donor_message',
-				'label'       => __( 'Κείμενα μετά την Δωρεά', 'nvm-donor' ),
+				'label'       => __( 'Texts after the Donation', 'nvm-donor' ),
 				'description' => __( 'Optional message from the donor.', 'nvm-donor' ),
 				'desc_tip'    => true,
 				'placeholder' => __( 'Enter a message for the donation...', 'nvm-donor' ),
@@ -153,7 +153,7 @@ class Product_Donor extends WC_Product_Simple {
 		woocommerce_wp_text_input(
 			array(
 				'id'                => '_donor_minimum_amount',
-				'label'             => __( 'Ελάχιστο ποσό Δωρεάς', 'nvm-donor' ),
+				'label'             => __( 'Minimum Donation Amount', 'nvm-donor' ),
 				'description'       => __( 'Set the minimum donation amount.', 'nvm-donor' ),
 				'type'              => 'number',
 				'desc_tip'          => true,
@@ -271,7 +271,7 @@ class Product_Donor extends WC_Product_Simple {
 				$cart_product = $cart_item['data'];
 				if ( $cart_product && 'donor' === $cart_product->get_type() ) {
 					wc_add_notice(
-						__( 'Λυπούμαστε αλλά μόνο μία Δωρεά μπορείτε να έχετε στο καλάθι σας. Δείτε το καλάθι σας <a href="' . wc_get_cart_url() . '">εδώ</a>.', 'nevma' ),
+						__( 'We are sorry, but you can only have one Donation in your cart. View your cart <a href="' . wc_get_cart_url() . '">εδώ</a>.', 'nevma' ),
 						'error'
 					);
 					return false;
