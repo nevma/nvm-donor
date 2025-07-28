@@ -605,12 +605,22 @@ class Product_View {
 				const donationChoice = document.querySelector('input[name="nvm_radio_choice"]:checked')?.value;
 				const customAmountInput = document.getElementById('donation_amount');
 				const customAmount = customAmountInput ? customAmountInput.value.trim() : '';
+				const minimunAmount = <?php echo $minimum; ?>;
 
 				if (donationChoice === 'custom') {
-					if (customAmount === '' || isNaN(customAmount) || parseFloat(customAmount) < 1) {
-						alert(<?php __( 'Please add a payment amount (minimum ' . $minimum . '€).', 'nevma-donor' ); ?>);
+					if (customAmount === '' || isNaN( customAmount ) || parseFloat( customAmount ) < minimunAmount) {
+
+
+						// if lang is el then show the message in greek
+						if ( document.documentElement.lang === 'el' ) {
+							alert( 'Η ελάχιστη δωρεά είναι ' + minimunAmount + '€' );
+						} else {
+							alert( 'The minimum donation is ' + minimunAmount + '€' );
+						}
+
 						return false;
 					}
+
 				}
 				return true;
 			}
@@ -648,7 +658,13 @@ class Product_View {
 							if (field && field.value.trim() === '') {
 								isValid = false;
 								field.classList.add('error'); // Add error class for styling
-								alert(`Το πεδίο "${field.labels[0].textContent}" είναι υποχρεωτικό.`);
+
+								// translate the alert message based on the language
+								if ( document.documentElement.lang === 'el' ) {
+									alert('Το πεδίο ' + field.labels[0]?.textContent + ' είναι υποχρεωτικό.');
+								} else {
+									alert('The field ' + field.labels[0]?.textContent + ' is required.');
+								}
 							} else if (field) {
 								field.classList.remove('error'); // Remove error class if valid
 							}
