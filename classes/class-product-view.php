@@ -59,8 +59,19 @@ class Product_View {
 
 		add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'nvm_thank_you_message_for_donor' ), 10, 2 );
 
+		// Simple unified translation filter for all donor product texts
+		add_filter( 'gettext', array( $this, 'nvm_translate_donor_texts' ), 20, 3 );
+		add_filter( 'gettext_with_context', array( $this, 'nvm_translate_donor_texts_with_context' ), 20, 4 );
+
+		// Direct title filters
+		add_filter( 'the_title', array( $this, 'nvm_change_page_title' ), 10, 2 );
+		add_filter( 'woocommerce_page_title', array( $this, 'nvm_change_woo_page_title' ), 10 );
+
+		// HTML buffer for edge cases only
 		add_action( 'template_redirect', array( $this, 'nvm_start_html_replacement_buffer' ) );
-		add_filter( 'gettext', array( $this, 'nvm_change_woocommerce_terms_error_message' ), 20, 3 );
+
+		// JavaScript failsafe for checkout page title
+		add_action( 'wp_footer', array( $this, 'nvm_js_title_replacement' ) );
 	}
 
 	/**
@@ -1535,16 +1546,16 @@ class Product_View {
 
 		// if is thank you page then get the order id and check if it contains a donor product
 		if ( is_wc_endpoint_url( 'order-received' ) ) {
-			$order_id = wc_get_order_id_by_order_key( sanitize_text_field( $_GET['key'] ) );
-			$order    = wc_get_order( $order_id );
-			if ( $order ) {
-				foreach ( $order->get_items() as $item ) {
-					$product = $item->get_product();
-					if ( $this->product_is_donor( $product ) ) {
-
-						$html = $this->nvm_replace_words_in_html( $html );
-
-						return $html;
+			if ( isset( $_GET['key'] ) ) {
+				$order_id = wc_get_order_id_by_order_key( sanitize_text_field( $_GET['key'] ) );
+				$order    = wc_get_order( $order_id );
+				if ( $order ) {
+					foreach ( $order->get_items() as $item ) {
+						$product = $item->get_product();
+						if ( $this->product_is_donor( $product ) ) {
+							$html = $this->nvm_replace_words_in_html( $html );
+							return $html;
+						}
 					}
 				}
 			}
@@ -1552,71 +1563,214 @@ class Product_View {
 
 		// if is checkout page then check if the cart contains a donor product
 		if ( is_checkout() ) {
-			if ( WC() && WC()->cart ) {
-				foreach ( WC()->cart->get_cart() as $cart_item ) {
-					$product = $cart_item['data'];
-					if ( $this->product_is_donor( $product ) ) {
-
-						$html = $this->nvm_replace_words_in_html( $html );
-
-						return $html;
-					}
-				}
+			if ( $this->cart_has_donor_product() ) {
+				$html = $this->nvm_replace_words_in_html( $html );
+				return $html;
 			}
 		}
 
-		return $html;
-	}
-
-	public function nvm_replace_words_in_html( $html ) {
-		$html = str_replace( 'παραγγελία', 'Δωρεά', $html );
-		$html = str_replace( 'Ολοκλήρωση Πληρωμής', 'Ολοκλήρωση Δωρεάς', $html );
 		return $html;
 	}
 
 	/**
-	 * Change WooCommerce error message for terms and conditions when a donor product is in the cart.
+	 * Replace specific words in HTML for donor products.
 	 *
-	 * @param string $translated_text The translated text.
+	 * @param string $html The original HTML content.
+	 * @return string The modified HTML content.
+	 */
+
+	public function nvm_replace_words_in_html( $html ) {
+		// Replacements for hardcoded text that gettext filter doesn't catch
+
+		// Use regex to replace text regardless of HTML structure
+		$html = preg_replace( '/Ολοκλήρωση Πληρωμής/u', 'Ολοκλήρωση Δωρεάς', $html );
+		$html = preg_replace( '/Checkout/i', 'Complete Donation', $html );
+
+		return $html;
+	}
+
+	/**
+	 * Simple unified translation function for all donor product texts.
+	 * Translates WooCommerce strings when a donor product is in the cart.
+	 *
+	 * @param string $translated_text Translated text.
 	 * @param string $text            Original text.
 	 * @param string $domain          Text domain.
-	 *
-	 * @return string
+	 * @return string Modified translated text.
 	 */
-	public function nvm_change_woocommerce_terms_error_message( $translated_text, $text, $domain ) {
-		// Apply only on frontend and only if cart is initialized.
-		if ( is_admin() || ! did_action( 'woocommerce_loaded' ) || ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
+	public function nvm_translate_donor_texts( $translated_text, $text, $domain ) {
+		// Only run on frontend after cart is loaded
+		if ( is_admin() || ! did_action( 'woocommerce_cart_loaded_from_session' ) ) {
 			return $translated_text;
 		}
 
-		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+		// Check if cart has donor product
+		if ( ! $this->cart_has_donor_product() ) {
 			return $translated_text;
 		}
 
-		// Defensive: avoid fatal error if method doesn't exist
-		if ( ! method_exists( $this, 'product_is_donor' ) ) {
-			return $translated_text;
+		// Translation map - add all your translations here
+		$translations = array(
+			// Greek translations
+			'Ολοκλήρωση Πληρωμής'                                                          => 'Ολοκλήρωση Δωρεάς',
+			'Checkout'                                                                     => 'Ολοκλήρωση Δωρεάς',
+			'παραγγελία'                                                                   => 'δωρεά',
+			'Παραγγελία'                                                                   => 'Δωρεά',
+			'Πληρωμή'                                                                      => 'Δωρεά',
+			'Προϊόν'                                                                       => 'Δωρεά',
+			'Προϊόντα'                                                                     => 'Δωρεές',
+			'Παρακαλούμε διαβάστε και αποδεχτείτε τους όρους και προϋποθέσεις'             => 'Παρακαλούμε διαβάστε και αποδεχτείτε τους όρους και προϋποθέσεις για να συνεχίσετε με τη Δωρεά σας.',
+
+			// English translations
+			'Place order'                                                                  => 'Complete Donation',
+			'Order'                                                                        => 'Donation',
+			'Product'                                                                      => 'Donation',
+			'Products'                                                                     => 'Donations',
+			'Please read and accept the terms and conditions to proceed with your order.'  => 'Please read and accept the terms and conditions to proceed with your donation.',
+		);
+
+		// Return translation if exists
+		if ( isset( $translations[ $text ] ) ) {
+			return $translations[ $text ];
 		}
 
-		// Early return if no donor product is found
+		// Return original translation if no match
+		return $translated_text;
+	}
+
+	/**
+	 * Translation function with context support.
+	 *
+	 * @param string $translated_text Translated text.
+	 * @param string $text            Original text.
+	 * @param string $context         Context.
+	 * @param string $domain          Text domain.
+	 * @return string Modified translated text.
+	 */
+	public function nvm_translate_donor_texts_with_context( $translated_text, $text, $context, $domain ) {
+		// Use the same logic as nvm_translate_donor_texts
+		return $this->nvm_translate_donor_texts( $translated_text, $text, $domain );
+	}
+
+	/**
+	 * Helper function to check if cart has donor product.
+	 *
+	 * @return bool True if cart has donor product, false otherwise.
+	 */
+	private function cart_has_donor_product() {
+		if ( ! function_exists( 'WC' ) || ! WC()->cart || WC()->cart->is_empty() ) {
+			return false;
+		}
+
 		foreach ( WC()->cart->get_cart() as $cart_item ) {
 			$product = $cart_item['data'];
 			if ( $this->product_is_donor( $product ) ) {
-				if ( $domain === 'woocommerce' ) {
-					if ( $text === 'Please read and accept the terms and conditions to proceed with your order.' ) {
-						return 'Παρακαλούμε διαβάστε και αποδεχτείτε τους όρους και προϋποθέσεις για να συνεχίσετε με τη Δωρεά σας.';
-					}
-
-					if ( $text === 'Παρακαλούμε διαβάστε και αποδεχτείτε τους όρους και προϋποθέσεις' ) {
-						return 'Παρακαλούμε διαβάστε και αποδεχτείτε τους όρους και προϋποθέσεις για να συνεχίσετε με τη Δωρεά σας.';
-					}
-				}
-
-				// only return on first match
-				break;
+				return true;
 			}
 		}
 
-		return $translated_text;
+		return false;
+	}
+
+	/**
+	 * Change page title directly for checkout page.
+	 *
+	 * @param string $title The page title.
+	 * @param int    $id The post ID.
+	 * @return string Modified title.
+	 */
+	public function nvm_change_page_title( $title, $id = null ) {
+		// Only on checkout page
+		if ( ! is_checkout() || is_admin() ) {
+			return $title;
+		}
+
+		// Check for donor product
+		if ( ! $this->cart_has_donor_product() ) {
+			return $title;
+		}
+
+		// Replace the title
+		if ( $title === 'Ολοκλήρωση Πληρωμής' || $title === 'Checkout' ) {
+			return get_locale() === 'el_GR' || strpos( get_locale(), 'el' ) !== false
+				? 'Ολοκλήρωση Δωρεάς'
+				: 'Complete Donation';
+		}
+
+		return $title;
+	}
+
+	/**
+	 * Change WooCommerce page title for checkout.
+	 *
+	 * @param string $title The page title.
+	 * @return string Modified title.
+	 */
+	public function nvm_change_woo_page_title( $title ) {
+		// Only on checkout page
+		if ( ! is_checkout() || is_admin() ) {
+			return $title;
+		}
+
+		// Check for donor product
+		if ( ! $this->cart_has_donor_product() ) {
+			return $title;
+		}
+
+		// Return translated title
+		return get_locale() === 'el_GR' || strpos( get_locale(), 'el' ) !== false
+			? 'Ολοκλήρωση Δωρεάς'
+			: 'Complete Donation';
+	}
+
+	/**
+	 * JavaScript failsafe to replace checkout page title.
+	 * This runs as a last resort if all PHP filters fail.
+	 */
+	public function nvm_js_title_replacement() {
+		// Only on checkout page
+		if ( ! is_checkout() || is_admin() ) {
+			return;
+		}
+
+		// Check for donor product
+		if ( ! $this->cart_has_donor_product() ) {
+			return;
+		}
+
+		$new_title = get_locale() === 'el_GR' || strpos( get_locale(), 'el' ) !== false
+			? 'Ολοκλήρωση Δωρεάς'
+			: 'Complete Donation';
+		?>
+		<script type="text/javascript">
+		document.addEventListener('DOMContentLoaded', function() {
+			console.log('🔄 NVM Donor: JavaScript title replacement loaded');
+			console.log('🎯 NVM Donor: New title will be: <?php echo esc_js( $new_title ); ?>');
+
+			var replacementCount = 0;
+
+			// Replace in all h1 elements
+			document.querySelectorAll('h1').forEach(function(h1) {
+				console.log('🔍 NVM Donor: Checking h1:', h1.textContent.trim());
+				if (h1.textContent.includes('Ολοκλήρωση Πληρωμής') || h1.textContent.includes('Checkout')) {
+					console.log('✅ NVM Donor: Found matching h1! Replacing...');
+					h1.textContent = '<?php echo esc_js( $new_title ); ?>';
+					replacementCount++;
+				}
+			});
+
+			// Replace in breadcrumbs
+			document.querySelectorAll('a, span').forEach(function(el) {
+				if (el.textContent === 'Ολοκλήρωση Πληρωμής' || el.textContent === 'Checkout') {
+					console.log('✅ NVM Donor: Found matching breadcrumb! Replacing:', el.textContent);
+					el.textContent = '<?php echo esc_js( $new_title ); ?>';
+					replacementCount++;
+				}
+			});
+
+			console.log('✨ NVM Donor: Replaced ' + replacementCount + ' elements');
+		});
+		</script>
+		<?php
 	}
 }
